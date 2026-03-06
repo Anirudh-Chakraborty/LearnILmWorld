@@ -252,7 +252,6 @@ const StudentProfile: React.FC = () => {
 
         if (originalImageKey && originalImageKey !== finalImageKey) {
           const isR2File = !originalImageKey.startsWith("http") && !originalImageKey.startsWith("https") && !originalImageKey.startsWith("data:");
-
           if (isR2File) {
             console.log("Deleting old R2 file:", originalImageKey);
             try {
@@ -275,6 +274,7 @@ const StudentProfile: React.FC = () => {
       setLoading(false)
     }
   }
+
 
 
   return (
