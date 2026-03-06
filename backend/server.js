@@ -74,10 +74,7 @@ app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/careers', careerRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/upload', uploadRoutes);
-<<<<<<< HEAD
-=======
 app.use('/api/class-schedule', ClassScheduleRoutes);
->>>>>>> main
 
 
 // Test route
