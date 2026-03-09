@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-// import axios from "axios";
 import { Link } from "react-router-dom";
 import trainer_profile from "../assets/trainer_profile.png";
 import spanish from "../assets/Spanish_Trainer.png";
@@ -14,7 +13,6 @@ import { BookOpen, CheckCircle, Play, Star, Users } from "lucide-react";
 // const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 // Moved types in TrainerBackCard.tsx component
-
 /* small helper for rendering label */
 type PickRole = "language" | "subject" | "other";
 
