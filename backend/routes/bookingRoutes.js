@@ -3,23 +3,34 @@ import Booking from '../models/Booking.js';
 import User from '../models/User.js';
 import { authenticate } from '../middleware/auth.js';
 import { accessFreeDemo } from '../controllers/bookingController.js';
+import ClassSchedule from '../models/ClassSchedule.js';
 
 const router = express.Router();
 
 // Create booking
 router.post('/', authenticate, async (req, res) => {
   try {
-    const { trainerId, studentName, paymentMethod, amount } = req.body;
+    const { trainerId, studentName, studentEmail, paymentMethod, amount, bookingType, date, time, duration, classId } = req.body;
     
     const booking = new Booking({
       student: req.user._id,
       trainer: trainerId,
       studentName,
+      studentEmail,
       paymentMethod,
-      amount
+      amount,
+      bookingType,
+      date,        
+      time,        
+      duration
     }); 
 
     await booking.save();
+    if (bookingType === 'group' && classId) {
+      await ClassSchedule.findByIdAndUpdate(classId, {
+        $push: { enrolledStudents: req.user._id } // Student enrolled in class
+      });
+    }
     await booking.populate(['student', 'trainer']);
 
     res.status(201).json(booking);

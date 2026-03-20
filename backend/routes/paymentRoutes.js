@@ -3,19 +3,21 @@ import Stripe from 'stripe';
 import dotenv from 'dotenv';
 import Booking from '../models/Booking.js';
 import { authenticate } from '../middleware/auth.js';
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
 
 dotenv.config();
 
 const router = express.Router();
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.warn('⚠️ STRIPE_SECRET_KEY is not set in .env, Stripe payments won’t work');
+// if (!process.env.STRIPE_SECRET_KEY) {
+//   console.warn('⚠️ STRIPE_SECRET_KEY is not set in .env, Stripe payments won’t work');
   // throw new Error('STRIPE_SECRET_KEY is not set in .env');
-}
+// }
 
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: '2022-11-15', // or latest
-});
+// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+//   apiVersion: '2022-11-15', // or latest
+// });
 
 // Create payment intent (Stripe)
 router.post('/create-payment-intent', authenticate, async (req, res) => {
@@ -179,4 +181,76 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   res.json({ received: true });
 });
 
+//for razorpay
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID, 
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
+router.post('/create-razorpay-order', authenticate, async (req, res) => {
+  try {
+    const { amount, currency = 'USD' } = req.body;
+
+    const options = {
+      amount: Math.round(amount * 100), // Razorpay uses the smallest currency unit (cents/paise)
+      currency,
+      receipt: `receipt_${Date.now()}`,
+    };
+
+    const order = await razorpay.orders.create(options);
+    res.json(order);
+  } catch (error) {
+    console.error('Razorpay order creation error:', error);
+    res.status(500).json({ message: 'Failed to create Razorpay order' });
+  }
+});
+
+// 2. Endpoint to verify the payment signature
+router.post('/verify-razorpay-payment', authenticate, async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      bookingId,
+      amount,
+      currency
+    } = req.body;
+
+    // Create the expected signature
+    const sign = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSign = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(sign.toString())
+      .digest("hex");
+
+    // Verify signature
+    if (razorpay_signature === expectedSign) {
+      // Update booking status in the database
+      const booking = await Booking.findByIdAndUpdate(
+        bookingId,
+        {
+          paymentId: razorpay_payment_id,
+          paymentStatus: 'completed',
+          status: 'confirmed',
+          paymentDetails: {
+            amount,
+            currency,
+            paymentMethod: 'razorpay',
+            status: 'succeeded',
+            processedAt: new Date()
+          }
+        },
+        { new: true }
+      );
+
+      return res.status(200).json({ success: true, message: "Payment verified successfully", booking });
+    } else {
+      return res.status(400).json({ success: false, message: "Invalid signature sent!" });
+    }
+  } catch (error) {
+    console.error('Verify payment error:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
 export default router;

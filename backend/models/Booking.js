@@ -23,10 +23,13 @@ const bookingSchema = new mongoose.Schema({
   },
   bookingType: {
     type: String,
-    enum: ['paid', 'free_demo'],
-    default: 'paid', 
+    enum: ['private', 'group', 'free_demo'],
+    default: 'private', 
     required: true
   },
+  date: { type: String }, 
+time: { type: String },
+duration: { type: Number},
   status: {
     type: String,
     enum: ['pending', 'confirmed', 'completed', 'cancelled'],
@@ -39,7 +42,7 @@ const bookingSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ['stripe', 'fake', 'none'], //none for free demo
+    enum: ['stripe', 'fake', 'none', 'razorpay'], //none for free demo
     required: true
   },
   amount: {
