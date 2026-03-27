@@ -537,8 +537,8 @@ const sendTrainerVerificationEmail = async (user, resumeData) => {
     expiresIn: '7d',
   });
 
-  const approveLink = `${process.env.FRONTEND_URL}/api/auth/verify-trainer/${verifyToken}?action=approve`;
-  const rejectLink = `${process.env.FRONTEND_URL}/api/auth/verify-trainer/${verifyToken}?action=reject`;
+  const approveLink = `${process.env.BACKEND_URL}/api/auth/verify-trainer/${verifyToken}?action=approve`;
+  const rejectLink = `${process.env.BACKEND_URL}/api/auth/verify-trainer/${verifyToken}?action=reject`;
 
   // FINAL BODY
   const htmlBody = `

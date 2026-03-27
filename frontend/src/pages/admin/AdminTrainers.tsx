@@ -49,7 +49,8 @@ const AdminTrainers: React.FC = () => {
                                     <th className="py-3 px-4 text-center font-semibold">Sessions</th>
                                     <th className="py-3 px-4 text-center font-semibold">Completed</th>
                                     <th className="py-3 px-4 text-center font-semibold">Students</th>
-                                    <th className="py-3 px-4 text-center font-semibold">Earnings</th>
+                                    <th className="py-3 px-4 text-center font-semibold">Total Earnings</th>
+                                    <th className="py-3 px-4 text-center font-semibold">Monthly Earnings</th>
                                     <th className="py-3 px-4 text-center font-semibold">Rating</th>
                                     <th className="py-3 px-4 text-center font-semibold">Verification</th>
                                 </tr>
@@ -74,6 +75,9 @@ const AdminTrainers: React.FC = () => {
                                         <td className="py-3 px-4 text-center text-gray-700 font-semibold whitespace-nowrap">
                                             ${t.dashboardStats?.totalEarnings?.toFixed(2) || '0.00'}
                                         </td>
+                                        <td className="py-3 px-4 text-center text-gray-700 font-semibold whitespace-nowrap">
+                    ${t.dashboardStats?.monthlyEarnings?.toFixed(2) || '0.00'}
+                </td>
                                         <td className="py-3 px-4 text-center whitespace-nowrap">
                                             <span
                                                 className={`px-2 py-1 rounded-md text-sm font-medium ${t.dashboardStats?.averageRating >= 4

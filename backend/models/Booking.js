@@ -77,6 +77,14 @@ duration: { type: Number},
     processedAt: Date
   },
 
+  //for 100ms id
+  roomId: { type: String, default: null },
+status: {
+  type: String,
+  enum: ['pending', 'confirmed', 'completed', 'cancelled', 'active'],
+  default: 'pending'
+},
+
   // Reference to the session being booked
   sessionId: {
     type: mongoose.Schema.Types.ObjectId,

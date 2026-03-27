@@ -65,4 +65,31 @@ export const accessFreeDemo = async (req, res) => {
 };
 
 
+//for 100ms
+export const getMyBookings = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const role = req.user.role; // Assuming you set req.user.role in your authenticate middleware
+
+    // 1. Determine if we should search by student or trainer ID
+    let query = {};
+    if (role === 'trainer') {
+      query = { trainer: userId };
+    } else {
+      query = { student: userId }; // Default to student
+    }
+
+    // 2. Fetch the bookings and populate the user details so the frontend has the names
+    const bookings = await Booking.find(query)
+      .populate('student', 'name email profile.avatar')
+      .populate('trainer', 'name email profile.avatar profile.demoVideo')
+      .sort({ createdAt: -1 }); // Show newest bookings first
+
+    res.status(200).json(bookings);
+
+  } catch (error) {
+    console.error("Error fetching my bookings:", error);
+    res.status(500).json({ message: "Server Error fetching bookings", error: error.message });
+  }
+};
 

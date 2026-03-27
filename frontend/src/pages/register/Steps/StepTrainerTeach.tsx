@@ -26,14 +26,15 @@ const SUBJECT_OPTIONS = [
   { value: "Psychology", label: "Psychology" },
   { value: "Philosophy", label: "Philosophy" },
 
-  { value: "Hindi", label: "Hindi" },
-  { value: "Bengali", label: "Bengali" },
+  // { value: "Hindi", label: "Hindi" },
 ];
 
 
 const LANGUAGE_OPTIONS = [
   { value: "English", label: "English" },
   { value: "Hindi", label: "Hindi" },
+  { value: "Bengali", label: "Bengali" },
+  { value: "Marathi", label: "Marathi" },
   { value: "Urdu", label: "Urdu" },
   { value: "Tamil", label: "Tamil" },
   { value: "Telugu", label: "Telugu" },
@@ -41,6 +42,7 @@ const LANGUAGE_OPTIONS = [
 
 // Trainer Hobbies (Professional Expertise Labels)
 const HOBBY_OPTIONS = [
+  { value: "Astrology", label: "Astrology" },
   { value: "Drawing", label: "Visual Arts / Drawing Instruction" },
   { value: "Dancing", label: "Dance Instruction" },
   { value: "Singing", label: "Vocal Coaching / Singing Lessons" },

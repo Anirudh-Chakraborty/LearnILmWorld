@@ -1,6 +1,5 @@
-// src/pages/student/StudentSession.tsx
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   User, Calendar, Clock, BookOpen, Video, Star
 } from 'lucide-react'
@@ -11,6 +10,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const StudentSessions: React.FC = () => {
   const [bookings, setBookings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchBookings()
@@ -21,12 +21,10 @@ const StudentSessions: React.FC = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      // Naya route jo seedha "Booking" table se data layega
       const response = await axios.get(`${API_BASE_URL}/api/bookings/my-bookings`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       
-      // Sirf wo bookings lo jo 'completed' hain (yani payment ho chuki hai)
       setBookings(
         Array.isArray(response.data) 
           ? response.data.filter((b) => b.paymentStatus === "completed") 
@@ -39,10 +37,22 @@ const StudentSessions: React.FC = () => {
     }
   }
 
+  const handleJoinSession = (booking: any) => {
+    if (booking.roomId) {
+      const sessionIdToUse = typeof booking.sessionId === 'object' && booking.sessionId !== null
+        ? booking.sessionId._id 
+        : booking.sessionId;
+        
+      navigate(`/session/${sessionIdToUse}?roomId=${booking.roomId}`);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-[#5186cd] font-medium">
-        Loading your sessions...
+      <div className="flex items-center justify-center h-64">
+        <div className="loading-dots">
+          <div></div><div></div><div></div><div></div>
+        </div>
       </div>
     )
   }
@@ -53,7 +63,7 @@ const StudentSessions: React.FC = () => {
 
       {bookings.length === 0 ? (
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center text-gray-500">
-          Abhi tak koi class book nahi ki hai. 
+          No Class is Booked yet. 
           <Link to="/main" className="text-[#5186cd] font-bold ml-2 hover:underline">
             Browse Trainers
           </Link>
@@ -62,13 +72,15 @@ const StudentSessions: React.FC = () => {
         <div className="space-y-4">
           {bookings.map((booking) => {
             
-            // Format Date & Time safely
             const sessionDate = booking.date ? new Date(booking.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'Date Pending';
             const sessionTime = booking.time ? new Date(booking.time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : '';
 
-            // Group aur Private classes ke liye alag rang ka tag
             const isGroup = booking.bookingType === 'group';
             const tagColor = isGroup ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700';
+
+            // Check if the trainer has started the session
+            // Make sure your backend saves `roomId` and updates status to `active`
+            const isSessionActive = booking.status === 'active' && booking.roomId;
 
             return (
               <div key={booking._id} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition hover:shadow-md">
@@ -110,9 +122,18 @@ const StudentSessions: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 4. Action Buttons (Future Proofing) */}
+                {/* 4. Action Buttons */}
                 <div className="flex gap-2">
-                   <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-400 rounded-lg text-sm font-medium cursor-not-allowed" title="Link will appear when trainer starts session">
+                   <button 
+                     onClick={() => handleJoinSession(booking)}
+                     disabled={!isSessionActive}
+                     title={isSessionActive ? "Join Session" : "Link will appear when trainer starts session"}
+                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                       isSessionActive 
+                         ? "bg-[#5186cd] text-white hover:bg-[#3f6eb0] cursor-pointer" 
+                         : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                     }`} 
+                   >
                      <Video size={16} /> Join
                    </button>
                 </div>

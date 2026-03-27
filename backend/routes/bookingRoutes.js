@@ -2,7 +2,7 @@ import express from 'express';
 import Booking from '../models/Booking.js';
 import User from '../models/User.js';
 import { authenticate } from '../middleware/auth.js';
-import { accessFreeDemo } from '../controllers/bookingController.js';
+import { accessFreeDemo, getMyBookings } from '../controllers/bookingController.js';
 import ClassSchedule from '../models/ClassSchedule.js';
 
 const router = express.Router();
@@ -30,6 +30,19 @@ router.post("/", authenticate, async (req, res) => {
       await ClassSchedule.findByIdAndUpdate(classId, {
         $push: { enrolledStudents: req.user._id } // Student enrolled in class
       });
+    }
+    if (bookingType === 'private' || bookingType === 'group') {
+      
+      // 1. Add +1 to Student's database
+      await User.findByIdAndUpdate(req.user._id, {
+        $inc: { "stats.totalSessions": 1 }
+      });
+
+      // 2. Add +1 to Trainer's database
+      await User.findByIdAndUpdate(trainerId, {
+        $inc: { "stats.totalSessions": 1 }
+      });
+      
     }
     await booking.populate(['student', 'trainer']);
 
@@ -159,5 +172,6 @@ router.delete("/:id", authenticate, async (req, res) => {
 });
 
 router.post("/free-demo-access", authenticate, accessFreeDemo);
+router.get('/my-bookings', authenticate, getMyBookings);
 
 export default router;
