@@ -26,7 +26,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import french_st from "../assets/French_student1.jpeg";
 import high from "../assets/highlight.jpeg";
 import chemistry from "../assets/chemistry.jpeg";
-import bengali from "../assets/bengali.png";
+import bengali from "../assets/bengali.jpeg";
 import sanskrit from "../assets/sanskrit.jpeg";
 import hindi from "../assets/hindi.png";
 import marathi from "../assets/marathi.png";
@@ -1370,7 +1370,7 @@ export default function LandingPageAlt() {
         { name: "HINDI", img: hindi },
         { name: "MARATHI", img: marathi },
         { name: "BENGALI", img: bengali },
-        { name: "CHEMISTY", img: chemistry },
+        { name: "CHEMISTRY", img: chemistry },
         { name: "ASTROLOGY", img: astrology },
       ].map((item, idx) => (
         <motion.div
@@ -1467,7 +1467,7 @@ export default function LandingPageAlt() {
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-10">
             {/* bg-[#024aac] text-white */}
             <div className=" text-[#024aac] bg-white border-2 border-black/20 px-16 py-4 rounded-full text-lg font-semibold shadow-lg text-center hover:scale-105 transition">
-              Quick lessons
+              Quick Lessons
             </div>
 
             <div className="text-[#024aac] bg-white border-2 border-black/20 px-16 py-4 rounded-full text-lg font-semibold shadow-lg text-center hover:scale-105 transition">

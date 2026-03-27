@@ -1,10 +1,11 @@
+import 'dotenv/config';
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
 class HMSTokenService {
 
-  static appAccessKey = process.env.APP_ACCESS_KEY;
-  static appSecret = process.env.APP_SECRET;
+  static appAccessKey = process.env.HMS_ACCESS_KEY;
+  static appSecret = process.env.HMS_SECRET;
 
   managementToken;
 

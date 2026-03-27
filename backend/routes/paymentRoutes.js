@@ -5,6 +5,7 @@ import Booking from '../models/Booking.js';
 import { authenticate } from '../middleware/auth.js';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
+import User from '../models/User.js'
 
 dotenv.config();
 
@@ -227,7 +228,6 @@ router.post('/verify-razorpay-payment', authenticate, async (req, res) => {
 
     // Verify signature
     if (razorpay_signature === expectedSign) {
-      // Update booking status in the database
       const booking = await Booking.findByIdAndUpdate(
         bookingId,
         {
@@ -244,7 +244,9 @@ router.post('/verify-razorpay-payment', authenticate, async (req, res) => {
         },
         { new: true }
       );
-
+      await User.findByIdAndUpdate(booking.trainer, {
+        $inc: { "stats.totalEarnings": Number(amount) }
+      });
       return res.status(200).json({ success: true, message: "Payment verified successfully", booking });
     } else {
       return res.status(400).json({ success: false, message: "Invalid signature sent!" });

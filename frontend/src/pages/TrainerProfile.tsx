@@ -196,7 +196,7 @@ const TrainerProfile: React.FC = () => {
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
           {/* LEFT CARD: Adjusted padding for mobile bg-gradient-to-b from-[#1E40AF] to-[#1e3a8a]*/}
-          <div className="lg:col-span-5 bg-[#024aac]  rounded-[2rem] p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden self-start lg:sticky lg:top-28 z-10 w-full">
+          <div className="lg:col-span-5 bg-[#1a56ad]   rounded-[2rem] p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden self-start lg:sticky lg:top-28 z-10 w-full">
             <div className="relative z-10 flex flex-col items-center text-center">
               {/* Profile Image */}
               <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl border-4 border-blue-400/30 overflow-hidden mb-6 shadow-xl bg-white">

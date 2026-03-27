@@ -5,11 +5,16 @@ import Booking from '../models/Booking.js'
 import User from '../models/User.js'
 import { authenticate, authorize } from '../middleware/auth.js'
 import { generateToken04 } from '../utils/zegoToken.js'
+import HMSTokenService from '../utils/hmsToken.js'; 
+import APIService  from '../utils/APIService.js';
 
 const router = express.Router()
 
-// Create session (Trainer only)
-router.post('/', authenticate, authorize(['trainer']), async (req, res) => {
+const tokenService = new HMSTokenService();
+const apiService = new APIService(tokenService);
+
+//100ms create room by trainer
+router.post('/create-room', authenticate, authorize(['trainer']), async (req, res) => {
   try {
     const {
       title,
@@ -19,7 +24,9 @@ router.post('/', authenticate, authorize(['trainer']), async (req, res) => {
       maxStudents,
       language,
       level,
-      scheduledDate
+      scheduledDate,
+      template_id, // Add if needed for 100ms
+      region       // Add if needed for 100ms
     } = req.body
 
     const bookings = await Booking.find({
@@ -34,13 +41,30 @@ router.post('/', authenticate, authorize(['trainer']), async (req, res) => {
 
     const studentIds = bookings.map(b => b.student)
 
+    // 1. Create room via 100ms API
+    const hmsPayload = {
+      name: `${title.replace(/\s+/g, '-')}-${uuidv4().substring(0, 8)}`,
+      description: description || 'Live Session',
+      template_id: process.env.HMS_TEMPLATE_ID, // Provide your 100ms template ID from frontend or .env
+      region: region || "in",
+    };
+    
+    let roomData;
+    try {
+        roomData = await apiService.post("/rooms", hmsPayload);
+    } catch (apiErr) {
+        console.error("100ms API Error:", apiErr);
+        return res.status(500).json({ message: "Failed to create 100ms room" });
+    }
+
+    // 2. Create session in DB using the 100ms room ID
     const session = await Session.create({
       trainer: req.user._id,
       students: studentIds,
       bookings: bookingIds,
       title,
       description,
-      roomId: `session_${uuidv4()}`, //ZEGO room key
+      roomId: roomData.id, // Use 100ms room ID
       duration,
       maxStudents,
       language,
@@ -50,20 +74,76 @@ router.post('/', authenticate, authorize(['trainer']), async (req, res) => {
 
     await Booking.updateMany(
       { _id: { $in: bookingIds } },
-      { sessionId: session._id }
+      { sessionId: session._id, roomId: roomData.id } // Also update roomId in Booking if you added it
     )
 
-    await User.findByIdAndUpdate(req.user._id, {
-      $inc: { 'stats.totalSessions': 1 }
-    })
+    // await User.findByIdAndUpdate(req.user._id, {
+    //   $inc: { 'stats.totalSessions': 1 }
+    // })
 
-    res.status(201).json(session)
+    res.status(201).json({ session, roomData })
   } catch (err) {
     res.status(400).json({ message: err.message })
   }
 })
 
-//Get sessions for logged-in user
+
+// Create session (Trainer only)
+// router.post('/', authenticate, authorize(['trainer']), async (req, res) => {
+//   try {
+//     const {
+//       title,
+//       description,
+//       bookingIds,
+//       duration,
+//       maxStudents,
+//       language,
+//       level,
+//       scheduledDate
+//     } = req.body
+
+//     const bookings = await Booking.find({
+//       _id: { $in: bookingIds },
+//       trainer: req.user._id,
+//       paymentStatus: 'completed'
+//     })
+
+//     if (!bookings.length) {
+//       return res.status(400).json({ message: 'No valid bookings found' })
+//     }
+
+//     const studentIds = bookings.map(b => b.student)
+
+//     const session = await Session.create({
+//       trainer: req.user._id,
+//       students: studentIds,
+//       bookings: bookingIds,
+//       title,
+//       description,
+//       roomId: `session_${uuidv4()}`, //ZEGO room key
+//       duration,
+//       maxStudents,
+//       language,
+//       level,
+//       scheduledDate: scheduledDate ? new Date(scheduledDate) : new Date()
+//     })
+
+//     await Booking.updateMany(
+//       { _id: { $in: bookingIds } },
+//       { sessionId: session._id }
+//     )
+
+//     await User.findByIdAndUpdate(req.user._id, {
+//       $inc: { 'stats.totalSessions': 1 }
+//     })
+
+//     res.status(201).json(session)
+//   } catch (err) {
+//     res.status(400).json({ message: err.message })
+//   }
+// })
+
+//100ms Get sessions for logged-in user
 router.get('/my-sessions', authenticate, async (req, res) => {
   try {
     const query =
@@ -79,11 +159,38 @@ router.get('/my-sessions', authenticate, async (req, res) => {
 
     res.json(sessions)
   } catch (err) {
-    res.status(500).json({ message: err.message })
+    console.error('Error in /my-sessions:', err);
+    res.status(500).json({ message: 'Internal server error' })
   }
 })
 
 // Get session by ID
+// router.get('/:id', authenticate, async (req, res) => {
+//   try {
+//     const session = await Session.findById(req.params.id)
+//       .populate('trainer', 'name email profile')
+//       .populate('students', 'name email')
+//       .populate('bookings')
+
+//     if (!session) {
+//       return res.status(404).json({ message: 'Session not found' })
+//     }
+
+//     const allowed =
+//       session.trainer._id.toString() === req.user._id.toString() ||
+//       session.students.some(s => s._id.toString() === req.user._id.toString())
+
+//     if (!allowed) {
+//       return res.status(403).json({ message: 'Access denied' })
+//     }
+
+//     res.json(session)
+//   } catch (err) {
+//     res.status(500).json({ message: err.message })
+//   }
+// })
+
+// 100ms get session by id
 router.get('/:id', authenticate, async (req, res) => {
   try {
     const session = await Session.findById(req.params.id)
@@ -109,116 +216,72 @@ router.get('/:id', authenticate, async (req, res) => {
   }
 })
 
-// ZEGO TOKEN API (core) for JOINING
-router.post('/:id/zego-token', authenticate, async (req, res) => {
+// 100ms: Join Room & Get Auth Token
+router.post('/join-room', authenticate, async (req, res) => {
+  const { session_id, role } = req.body;
+  console.log("before const")
+  
+  if (!session_id || !role) {
+    return res.status(400).json({ success: false, msg: "session_id and role are required" });
+  }
+  console.log("before try")
   try {
-    console.log('[ZEGO][TOKEN] Request', {
-      sessionId: req.params.id,
-      mongoUserId: req.user._id.toString(),
-      zegoUserID: `u${req.user._id.toString()}`,
-      role: req.user.role,
-      time: new Date().toISOString()
-    })
-
-    const session = await Session.findById(req.params.id)
-
+    console.log('afete try')
+    const session = await Session.findById(session_id);
     if (!session) {
       return res.status(404).json({ message: 'Session not found' })
     }
 
-    // ---- Access checks (same as demo)
-    const isTrainerOwner =
-      session.trainer.toString() === req.user._id.toString()
-
-    const isStudent =
-      session.students.some(
-        s => s.toString() === req.user._id.toString()
-      )
-
-    const isAdmin = req.user.role === 'admin'
+    const isTrainerOwner = session.trainer.toString() === req.user._id.toString();
+    const isStudent = session.students.some(s => s.toString() === req.user._id.toString());
+    const isAdmin = req.user.role === 'admin';
 
     if (!isTrainerOwner && !isStudent && !isAdmin) {
       return res.status(403).json({ message: 'Access denied' })
     }
 
-    // ---- Session state check
     if (!['scheduled', 'active'].includes(session.status)) {
       return res.status(403).json({ message: 'Session not joinable' })
     }
 
-    // ---- Role → privilege mapping
-    const canPublish =
-      req.user.role === 'trainer' || req.user.role === 'admin'
+    const room_id = session.roomId;
+    const user_id = req.user._id.toString();
 
-    console.log('[ZEGO][TOKEN] Access resolved', {
-      isTrainerOwner,
-      isStudent,
-      isAdmin,
-      canPublish,
-      sessionStatus: session.status
-    })
+    let hmsRole = "student"; 
+    
+    if (role === 'trainer') {
+      hmsRole = "host";
+    } else if (role === 'student') {
+      hmsRole = "student";
+    } else if (role === 'admin') {
+      hmsRole = "admin";
+    }
 
+    // Verify room exists in 100ms
+    const roomData = await apiService.get(`/rooms/${room_id}`);
+    console.log('100ms Room data:', roomData);
 
-    const payload = JSON.stringify({
-      room_id: session.roomId,
-      privilege: {
-        1: 1,                 // loginRoom
-        2: canPublish ? 1 : 0 // publishStream
-      },
-      stream_id_list: null
-    })
-
-    console.log('[ZEGO][TOKEN] Payload summary', {
-      roomId: session.roomId,
-      privilege: {
-        login: 1,
-        publish: canPublish ? 1 : 0
-      }
-    })
-
-
-    // ---- ZEGO-safe userID (must be consistent)
-    const zegoUserID = `u${req.user._id.toString()}`
-
-    const token = generateToken04(
-      Number(process.env.ZEGO_APP_ID),
-      zegoUserID,
-      process.env.ZEGO_SERVER_SECRET,
-      600,          // 10 minutes
-      payload
-    )
-
-    console.log('[ZEGO][TOKEN] Token generated', {
-      tokenPrefix: token.slice(0, 4), // should always be "04"
-      tokenLength: token.length,
-      expiresInSeconds: 3600 //10 min
-    })
-
-    console.log('[ZEGO][TOKEN] Token response sent', {
-      roomID: session.roomId,
-      zegoUserID,
-      role: req.user.role
-    })
-
-
+    // 2. Pass the mapped 'hmsRole' instead of 'role'
+    const token = tokenService.getAuthToken({ room_id, user_id, role: hmsRole });
+    
     res.json({
-      appID: Number(process.env.ZEGO_APP_ID),
-      roomID: session.roomId,
-      userID: zegoUserID,
-      userName: req.user.name || req.user.email,
-      role: req.user.role,
-      token
-    })
-
+      success: true,
+      token,
+      roomData: roomData,
+      msg: "Joined room successfully!",
+    });
   } catch (err) {
-    console.error('[ZEGO][TOKEN] Error', err)
-    res.status(500).json({ message: 'ZEGO token generation failed' })
+    console.error(err);
+    if (err.response && err.response.status === 404) {
+      return res.status(404).json({ success: false, msg: "Room not found on 100ms" });
+    }
+    res.status(500).send("Internal Server Error");
   }
-})
+});
 
 
-// Force end session (Trainer/Admin)
-router.put('/:id/end', authenticate, authorize(['trainer', 'admin']), async (req, res) => {
+//100ms Force end session (Trainer/Admin)
+router.post('/end-room/:id', authenticate, authorize(['trainer', 'admin']), async (req, res) => {
   try {
     const session = await Session.findById(req.params.id)
 
@@ -233,6 +296,18 @@ router.put('/:id/end', authenticate, authorize(['trainer', 'admin']), async (req
       return res.status(403).json({ message: 'Access denied' })
     }
 
+    const room_id = session.roomId;
+
+    if (room_id) {
+        // Disable the room on 100ms to immediately end it
+        try {
+            const payload = { enabled: false };
+            await apiService.post(`/rooms/${room_id}`, payload);
+            console.log(`100ms room ${room_id} disabled successfully.`);
+        } catch (hmsError) {
+             console.error("100ms API Error ending room:", hmsError.response?.data || hmsError.message);
+        }
+    }
 
     session.status = 'ended'
     await session.save()
@@ -246,51 +321,91 @@ router.put('/:id/end', authenticate, authorize(['trainer', 'admin']), async (req
       $inc: { 'stats.completedSessions': 1 }
     })
 
-    res.json({ message: 'Session ended' })
+    await User.updateMany(
+      { _id: { $in: session.students } },
+      { $inc: { 'stats.completedSessions': 1 } }
+    )
+
+    res.json({ success: true, message: 'Session ended' })
   } catch (err) {
     res.status(500).json({ message: err.message })
   }
 })
 
 // session updation by admin + trainer(owner)
-router.put('/:id', authenticate, authorize(['trainer', 'admin']), async (req, res) => {
-  const session = await Session.findById(req.params.id)
-  if (!session) return res.status(404).json({ message: 'Not found' })
+// router.put('/:id', authenticate, authorize(['trainer', 'admin']), async (req, res) => {
+//   const session = await Session.findById(req.params.id)
+//   if (!session) return res.status(404).json({ message: 'Not found' })
 
-  // Trainer can only edit their own session
-  if (
-    req.user.role === 'trainer' &&
-    session.trainer.toString() !== req.user._id.toString()
-  ) {
-    return res.status(403).json({ message: 'Access denied' })
-  }
+//   // Trainer can only edit their own session
+//   if (
+//     req.user.role === 'trainer' &&
+//     session.trainer.toString() !== req.user._id.toString()
+//   ) {
+//     return res.status(403).json({ message: 'Access denied' })
+//   }
 
-  if (session.status === 'ended') {
-    return res.status(400).json({ message: 'Cannot update ended session' })
-  }
+//   if (session.status === 'ended') {
+//     return res.status(400).json({ message: 'Cannot update ended session' })
+//   }
 
-  const updates = req.body
+//   const updates = req.body
 
-  // Hard locks
-  delete updates.roomId
-  delete updates.trainer
-  delete updates.students
-  delete updates.bookings
-  delete updates.status
+//   // Hard locks
+//   delete updates.roomId
+//   delete updates.trainer
+//   delete updates.students
+//   delete updates.bookings
+//   delete updates.status
 
-  const updated = await Session.findByIdAndUpdate(
-    req.params.id,
-    { $set: updates },
-    { new: true, runValidators: true }
-  )
+//   const updated = await Session.findByIdAndUpdate(
+//     req.params.id,
+//     { $set: updates },
+//     { new: true, runValidators: true }
+//   )
 
-  res.json(updated)
-})
+//   res.json(updated)
+// })
 
-// session status updates
+// session updation by admin + trainer(owner)
+// router.put('/:id', authenticate, authorize(['trainer', 'admin']), async (req, res) => {
+//   const session = await Session.findById(req.params.id)
+//   if (!session) return res.status(404).json({ message: 'Not found' })
+
+//   // Trainer can only edit their own session
+//   if (
+//     req.user.role === 'trainer' &&
+//     session.trainer.toString() !== req.user._id.toString()
+//   ) {
+//     return res.status(403).json({ message: 'Access denied' })
+//   }
+
+//   if (session.status === 'ended') {
+//     return res.status(400).json({ message: 'Cannot update ended session' })
+//   }
+
+//   const updates = req.body
+
+//   // Hard locks
+//   delete updates.roomId
+//   delete updates.trainer
+//   delete updates.students
+//   delete updates.bookings
+//   delete updates.status
+
+//   const updated = await Session.findByIdAndUpdate(
+//     req.params.id,
+//     { $set: updates },
+//     { new: true, runValidators: true }
+//   )
+
+//   res.json(updated)
+// })
+
+//100ms session status updates
 router.put('/:id/status', authenticate, authorize(['trainer', 'admin']), async (req, res) => {
-  const { status } = req.body
-  const ALLOWED = ['scheduled', 'active', 'cancelled']
+  const { status, roomId } = req.body // Destructure roomId from body
+  const ALLOWED = ['scheduled', 'active', 'cancelled', 'ended'] // Added ended if needed here
 
   const session = await Session.findById(req.params.id)
   if (!session) return res.status(404).json({ message: 'Not found' })
@@ -298,8 +413,9 @@ router.put('/:id/status', authenticate, authorize(['trainer', 'admin']), async (
   // cannot regress a session life cycle check
   const transitions = {
     scheduled: ['active', 'cancelled'],
-    active: ['cancelled'],
-    cancelled: []
+    active: ['cancelled', 'ended'], // Allow moving from active to ended here if needed
+    cancelled: [],
+    ended: []
   }
 
   if (!transitions[session.status]?.includes(status)) {
@@ -321,11 +437,27 @@ router.put('/:id/status', authenticate, authorize(['trainer', 'admin']), async (
     return res.status(400).json({ message: 'Session already ended' })
   }
 
-  session.status = status
+  session.status = status;
+  
+  // If a roomId is passed when activating the session, save it
+  if (roomId && status === 'active') {
+      session.roomId = roomId;
+  }
+  
   await session.save()
+
+  // Update related bookings if activating the session
+  if(roomId && status === 'active'){
+     await Booking.updateMany(
+        { sessionId: session._id },
+        { roomId: roomId, status: 'active' }
+      )
+  }
 
   res.json(session)
 })
+
+// create room for teacher
 
 
 export default router

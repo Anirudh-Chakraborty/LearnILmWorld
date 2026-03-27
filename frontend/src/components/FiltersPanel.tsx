@@ -60,7 +60,7 @@ const LANGUAGES = [
 
 
 const SUBJECTS = [
-    'Mathematics', 'Science', 'Physics', 'Chemistry', 'Biology', 'English', 'Hindi', 'Social Science', 'Geography', 'History', 'Civics', 'Computer Science', 'Economics', 'Accountancy', 'Business Studies'
+    'Mathematics', 'Science', 'Physics', 'Chemistry', 'Biology', 'English',  'Social Science', 'Geography', 'History', 'Civics', 'Computer Science', 'Economics', 'Accountancy', 'Business Studies'
 ]
 
 

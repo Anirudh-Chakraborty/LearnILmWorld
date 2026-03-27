@@ -13,7 +13,7 @@ const SUBJECTS = [
   "Chemistry",
   "Biology",
   "Social Science",
-  "Hindi",
+  // "Hindi",
   "French",
   "German",
   "Spanish",
@@ -85,6 +85,7 @@ const LANGUAGES = [
 
 // Student Hobbies
 export const HOBBIES = [
+  "Astrology",
   "Drawing",
   "Dancing",
   "Singing",

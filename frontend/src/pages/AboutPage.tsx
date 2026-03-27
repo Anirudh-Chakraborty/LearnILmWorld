@@ -66,8 +66,8 @@ export default function AboutPage() {
     },
     {
       icon: Calendar,
-      title: "Payment Policy", // Title matches the photo (likely meant to be 'Cancellations')
-      text: "Learners can cancel or reschedule sessions from their dashboard ass per the platform's cancellation policy. late cancellations may not qualify for refund",
+      title: "Cancellation & Scheduling", 
+      text: "Learners can cancel or reschedule sessions from their dashboard ass per the platform's cancellation policy. Late cancellations may not qualify for refund",
     },
     {
       icon: UserX,
@@ -77,7 +77,7 @@ export default function AboutPage() {
     {
       icon: XCircle,
       title: "Non- Refundable Cases",
-      text: "Refund are not applicable for completed sessions, partial attendance, or misuse of the platform. Any suspicious activity may lead to account review.",
+      text: "Refund are not applicable for completed sessions, partial attendance or misuse of the platform. Any suspicious activity may lead to account review.",
     },
     {
       icon: LifeBuoy,
@@ -129,7 +129,7 @@ export default function AboutPage() {
     {
       title: "Lifelong Learning",
       description:
-        "We invest in our team's growht as much as our students, with dedicated budgets for development",
+        "We invest in our team's growth as much as our students, with dedicated budgets for development",
       icon: GraduationCap,
     },
   ];
