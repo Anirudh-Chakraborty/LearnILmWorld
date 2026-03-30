@@ -9,6 +9,7 @@ import {
   CheckCircle,
   User,
   Clock,
+  TrendingUp,
 } from "lucide-react"
 
 import {
@@ -35,6 +36,7 @@ const TrainerHome = () => {
     totalSessions: 0,
     upcoming: 0,
     completed: 0,
+    monthlyEarnings: 0,
   })
 
   const [earningsData, setEarningsData] = useState<any[]>([])
@@ -73,16 +75,32 @@ const TrainerHome = () => {
       const bookings = bookingsRes.data || []
       const userData = userRes.data || {}
 
+      const completedBookings = bookings.filter((b: any) => b.paymentStatus === "completed");
+      // Calculate Monthly Earnings dynamically
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
+      const monthlyCalculatedEarnings = completedBookings.filter((b: any) => {
+        const bDate = new Date(b.createdAt);
+        return bDate.getMonth() === currentMonth && bDate.getFullYear() === currentYear;
+      }).reduce((sum: number, b: any) => sum + (Number(b.amount) || 0), 0);
+      const upcomingSet = new Set();
+      completedBookings.forEach((b: any) => {
+        if (b.status !== "completed" && b.status !== "cancelled") {
+          upcomingSet.add(`${b.date}_${b.time}_${b.bookingType}`);
+        }
+      });
       setStats({
         students: new Set(bookings.map((b: any) => b.student?._id)).size,
         rating: userData.stats?.rating || 5,
         earnings: userData.stats?.totalEarnings || 0,
-        totalSessions: sessions.length,
-        upcoming: sessions.filter((s: any) => s.status === "scheduled").length,
-        completed: sessions.filter((s: any) => s.status === "completed").length,
+        monthlyEarnings: monthlyCalculatedEarnings, // Added state here
+        totalSessions: userData.stats?.totalSessions || 0,
+        completed: userData.stats?.completedSessions || 0,
+        upcoming: upcomingSet.size,
       })
-
-      setRecentBookings(bookings.slice(0, 5))
+      setRecentBookings(completedBookings.slice(0, 3))
       setEarningsData(generateMonthlyData())
     } finally {
       setLoading(false)
@@ -123,17 +141,23 @@ const TrainerHome = () => {
       colorClass: "text-blue-600 bg-blue-50"
     },
     {
+      label: "Sessions Completed",
+      value: stats.completed,
+      icon: CheckCircle,
+      colorClass: "text-blue-600 bg-blue-50"
+    },
+    {
       label: "Upcoming Events",
       value: stats.upcoming,
       icon: Clock,
       colorClass: "text-blue-600 bg-blue-50"
     },
     {
-      label: "Sessions Completed",
-      value: stats.completed,
-      icon: CheckCircle,
-      colorClass: "text-blue-600 bg-blue-50"
-    }
+    label: 'Monthly Earnings',
+    value: `$${stats.monthlyEarnings?.toFixed(2) || '0.00'}`,
+    icon: TrendingUp, 
+    colorClass: 'text-blue-600 bg-blue-50',
+  },
   ];
 
   return (
@@ -258,30 +282,40 @@ const TrainerHome = () => {
             {recentBookings.map((b) => (
               <div
                 key={b._id}
-                className="flex items-center justify-between p-4 rounded-2xl border border-blue-50 hover:shadow-sm transition"
+                className="flex items-center justify-between p-4 rounded-2xl border border-gray-100 hover:bg-gray-50 transition"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
                     <User className="text-blue-600 w-5 h-5" />
                   </div>
+                  
                   <div>
-                    <p className="font-medium text-[#2D274B]">
-                      {b.student?.name || "Unknown Student"}
+                    {/* Class Type and Title */}
+                    <p className="font-semibold capitalize text-gray-800">
+                      {b.bookingType?.replace('_', ' ')} Class
                     </p>
-                    <p className="text-sm text-gray-500">
-                      ${b.amount} • {new Date(b.createdAt).toLocaleDateString()}
+                    {/* Student Name and Amount */}
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      with {b.student?.name || "Unknown Student"} • ${b.amount || 0}
                     </p>
                   </div>
                 </div>
 
-                <span className="text-sm capitalize px-3 py-1 rounded-full bg-blue-50 text-blue-600">
+                {/* Dynamic Status Tag */}
+                <span
+                  className={`px-3 py-1 text-xs font-semibold rounded-full capitalize ${
+                    b.status === "completed"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-blue-100 text-blue-700"
+                  }`}
+                >
                   {b.status}
                 </span>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">No bookings yet</p>
+          <p className="text-gray-500 text-center py-6">No bookings yet</p>
         )}
       </div>
     </div>

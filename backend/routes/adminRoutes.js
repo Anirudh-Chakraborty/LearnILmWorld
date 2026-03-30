@@ -231,6 +231,10 @@ router.patch('/users/:id/verify', async (req, res) => {
 router.get('/trainers', async (req, res) => {
     try {
         const trainers = await User.find({ role: 'trainer' }).select('-password')
+        // Define the start of the current month outside the loop for efficiency
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
 
         const result = await Promise.all(
             trainers.map(async (trainer) => {
@@ -238,7 +242,13 @@ router.get('/trainers', async (req, res) => {
                 const bookings = await Booking.find({ trainer: trainer._id })
                 const completedSessions = sessions.filter(s => s.status === 'completed').length
                 const students = new Set(bookings.map(b => String(b.student))).size
-
+                const monthlyEarnings = bookings
+                    .filter(b => 
+                        b.paymentStatus === 'completed' && 
+                        new Date(b.createdAt) >= startOfMonth
+                    )
+                    .reduce((sum, b) => sum + (Number(b.amount) || 0), 0);
+                    
                 return {
                     ...trainer.toObject(),
                     dashboardStats: {
@@ -247,6 +257,7 @@ router.get('/trainers', async (req, res) => {
                         upcomingSessions: sessions.filter(s => s.status === 'scheduled').length,
                         totalStudents: students,
                         totalEarnings: trainer.stats?.totalEarnings || 0,
+                        monthlyEarnings,
                         averageRating: trainer.stats?.rating || 5.0
                     }
                 }

@@ -537,8 +537,8 @@ const sendTrainerVerificationEmail = async (user, resumeData) => {
     expiresIn: '7d',
   });
 
-  const approveLink = `${process.env.FRONTEND_URL}/api/auth/verify-trainer/${verifyToken}?action=approve`;
-  const rejectLink = `${process.env.FRONTEND_URL}/api/auth/verify-trainer/${verifyToken}?action=reject`;
+  const approveLink = `${process.env.BACKEND_URL}/api/auth/verify-trainer/${verifyToken}?action=approve`;
+  const rejectLink = `${process.env.BACKEND_URL}/api/auth/verify-trainer/${verifyToken}?action=reject`;
 
   // FINAL BODY
   const htmlBody = `
@@ -732,6 +732,34 @@ router.get('/me', authenticate, async (req, res) => {
     profile: req.user.profile,
     stats: req.user.stats
   });
+});
+
+//Change the password
+router.put('/change-password', authenticate, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Please provide both current and new passwords.' });
+    }
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Compare current password using your existing model method
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Incorrect current password.' });
+    }
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: 'Password updated successfully!' });
+  } catch (error) {
+    console.error('Change Password Error:', error);
+    res.status(500).json({ message: 'Failed to update password. Please try again later.' });
+  }
 });
 
 // ---------------- FORGOT PASSWORD ----------------

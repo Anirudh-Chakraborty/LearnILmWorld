@@ -87,6 +87,7 @@ const userSchema = new mongoose.Schema({
     highestQualification: { type: String, trim: true, default: '' },
     collegeName: { type: String, trim: true, default: '' },
 
+    //the data is stored for trainer
     // languages as array of strings for simple UI usage
     languages: [{ type: String, trim: true }],
     hobbies: [{ type: String, trim: true }],
@@ -103,6 +104,7 @@ const userSchema = new mongoose.Schema({
     location: { type: String, trim: true, default: '' },
     continent: { type: String, trim: true, default: '' },
 
+    //the data is stored for student 
     learningType: {
       type: String,
       enum: ['subjects', 'languages', 'hobbies', ''],
@@ -118,6 +120,7 @@ const userSchema = new mongoose.Schema({
     // always use uppercase or else ReactFlagsSelect will ignore it.
     // nationalityName: { type: String, trim: true, default: '' }, // optional
 
+    //when trainer select subject than these 2 will work
     // list of specializations
     specializations: { type: [String], default: [] },
     standards: { type: [String], default: [] },

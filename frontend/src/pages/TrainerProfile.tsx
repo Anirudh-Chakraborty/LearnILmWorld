@@ -196,7 +196,7 @@ const TrainerProfile: React.FC = () => {
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
 
           {/* LEFT CARD: Adjusted padding for mobile bg-gradient-to-b from-[#1E40AF] to-[#1e3a8a]*/}
-          <div className="lg:col-span-5 bg-[#024aac]  rounded-[2rem] p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden self-start lg:sticky lg:top-28 z-10 w-full">
+          <div className="lg:col-span-5 bg-[#1a56ad]   rounded-[2rem] p-6 sm:p-8 text-white shadow-2xl relative overflow-hidden self-start lg:sticky lg:top-28 z-10 w-full">
             <div className="relative z-10 flex flex-col items-center text-center">
               {/* Profile Image */}
               <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl border-4 border-blue-400/30 overflow-hidden mb-6 shadow-xl bg-white">
@@ -515,7 +515,7 @@ const TrainerProfile: React.FC = () => {
                 {reviews && reviews.length > 0 && (
                   <div className="bg-white rounded-[1.5rem] p-5 sm:p-6 shadow-sm border border-slate-100 flex flex-col items-center text-center">
                     <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2">
-                      <Quote className="text-[#5186cd] fill-[#e9f1fb] rotate-180 w-6 h-6 sm:w-8 sm:h-8" />
+                      <Quote className="text-[#1a56ad] fill-[#e9f1fb] rotate-180 w-6 h-6 sm:w-8 sm:h-8" />
                       <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Student Testimonials</h2>
                     </div>
                     <p className="text-slate-500 mb-4 sm:mb-6 text-xs sm:text-sm px-2">What our students say about their learning experience</p>

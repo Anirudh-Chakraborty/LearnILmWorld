@@ -1,472 +1,328 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { createPortal } from 'react-dom'
-// import { Video } from 'lucide-react'
-import axios from 'axios'
-import bg_main from '../assets/bg_main.jpeg'
+import React, { useEffect, useState, useRef } from 'react';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import {
+  HMSRoomProvider,
+  useHMSActions,
+  useHMSStore,
+  selectIsConnectedToRoom,
+  selectPeers,
+  selectPeerScreenSharing,
+  selectScreenShareByPeerID, // For Screen Sharing
+  useScreenShare,
+  useVideo,
+  useHMSNotifications,
+  selectHMSMessages,         // Added for Chat
+  HMSNotificationTypes       // Added for Kick-out logic
+} from '@100mslive/react-sdk';
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Send, MessageSquare, X } from 'lucide-react';
 
-// import { ZegoExpressEngine } from 'zego-express-engine-webrtc'
-import { ZegoUIKitPrebuilt } from '@zegocloud/zego-uikit-prebuilt'
-import { useAuth } from '../contexts/AuthContext'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// TYPES 
-interface Session {
-  _id: string
-  title: string
-  roomId: string
-  description?: string
-  trainer: { _id: string; name: string; email: string }
-  students: Array<{ _id: string; name: string; email: string }>
-  status: 'scheduled' | 'active' | 'ended' | 'cancelled'
-  duration?: number
-  scheduledDate?: string
-  language?: string
-  level?: string
-}
+// Video Tile Component 
+const VideoTile = ({ peer, isLocal }: { peer: any, isLocal: boolean }) => {
+  const { videoRef } = useVideo({
+    trackId: peer.videoTrack
+  });
 
-// CONSTANTS 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string
-// const ZEGO_SERVER = import.meta.env.VITE_ZEGO_SERVER_LINK
-// const ZEGO_DEMO_SECRET = import.meta.env.VITE_ZEGO_DEMO_SECRET
-// const ZEGO_APP_ID = Number(import.meta.env.VITE_ZEGO_APP_ID)
-
-function JoiningOverlay({ visible }: { visible: boolean }) {
-  if (!visible) return null
-
-  return createPortal(
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 text-white text-sm">
-      Joining session…
-    </div>,
-    document.body
-  )
-}
-
-// COMPONENT
-const SessionRoom: React.FC = () => {
-  const { sessionId } = useParams<{ sessionId: string }>()
-  const navigate = useNavigate()
-  const { user } = useAuth()
-
-  const [session, setSession] = useState<Session | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string>('')
-  const [sessionStarted, setSessionStarted] = useState<boolean>(false)
-
-  // const [hasJoined, setHasJoined] = useState(false)
-  const [joinPhase, setJoinPhase] = useState<'idle' | 'joining' | 'joined' | 'left'>('idle')
-
-
-
-  const joinLockRef = useRef(false)
-  const hasAutoJoinedRef = useRef(false)
-
-
-
-  // const containerRef = useRef<HTMLDivElement | null>(null)
-  const zpRef = useRef<any>(null)
-
-  // -------FETCH SESSION
-  useEffect(() => {
-    if (!sessionId) return
-    fetchSession()
-  }, [sessionId])
-
-  function showZegoRoot() {
-    const el = document.getElementById('zego-root')
-    if (el) el.style.display = 'block'
-  }
-
-  function hideZegoRoot() {
-    const el = document.getElementById('zego-root')
-    if (el) el.style.display = 'none'
-  }
-
-
-  const fetchSession = async () => {
-    try {
-      // console.log('[ZEGO] Fetching session', { sessionId })
-      const res = await axios.get<Session>(
-        `${API_BASE_URL}/api/sessions/${sessionId}`
-      )
-      // console.log('[ZEGO] Session fetched', res.data)
-      setSession(res.data)
-      if (res.data.status === 'active') {
-        setSessionStarted(true)
-      }
-    } catch (err) {
-      console.error(err)
-      setError('Failed to load session')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // START SESSION (TRAINER)
-  // const startSession = async () => {
-
-  //   if (!session || user?.role !== 'trainer') return
-
-  //   try {
-  //     await axios.put(
-  //       `${API_BASE_URL}/api/sessions/${session._id}/status`,
-  //       { status: 'active' }
-  //     )
-  //     // console.log('[ZEGO] Starting session', { sessionId: session._id });
-  //     setSessionStarted(true)
-  //     setSession({ ...session, status: 'active' })
-  //   } catch (err) {
-  //     console.error('Failed to start session', err)
-  //   }
-  // }
-
-  //Forcely ends session for everyone (by TRAINER)  
-  const endSession = async () => {
-
-    if (!session || user?.role !== 'trainer') return
-
-    try {
-      await axios.put(
-        `${API_BASE_URL}/api/sessions/${session._id}/end`
-      )
-
-      window.dispatchEvent(new Event('SESSION_ENDED'))
-      console.log('[ZEGO] Ending session', { sessionId: session._id })
-
-      leaveRoom()
-
-      navigate(
-        user.role === 'trainer'
-          ? '/trainer/sessions'
-          : '/student/sessions'
-      )
-    } catch (err) {
-      console.error('Failed to end session', err)
-    }
-  }
-
-  const joinRoomWithToken = async () => {
-    if (!session || joinPhase === 'joined' || joinLockRef.current) return
-
-    joinLockRef.current = true
-    setJoinPhase('joining')
-
-    try {
-
-      console.log('[ZEGO][FRONTEND] Requesting token from backend ', joinPhase, "... ")
-
-      const res = await axios.post(
-        `${API_BASE_URL}/api/sessions/${session._id}/zego-token`
-      )
-
-      const { appID, roomID, userID, userName, token } = res.data
-
-      console.log('[ZEGO][FRONTEND] Token received', {
-        appID,
-        roomID,
-        userID,
-        userName,
-        tokenPrefix: token.slice(0, 4),
-        tokenLength: token.length
-      })
-
-      if (!token || !token.startsWith('04')) {
-        throw new Error('Invalid ZEGO token received')
-      }
-
-      const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
-        Number(appID),
-        token,
-        roomID,
-        userID,
-        userName
-      )
-
-      const zp = ZegoUIKitPrebuilt.create(kitToken)
-      zpRef.current = zp
-      showZegoRoot()
-
-      zp.joinRoom({
-        container: document.getElementById('zego-root')!,
-
-        scenario: {
-          mode: ZegoUIKitPrebuilt.VideoConference
-        },
-
-        showPreJoinView: false,   // IMPORTANT
-        showRoomDetailsButton: false,
-
-        onJoinRoom: () => {
-          console.log('[ZEGO][UIKIT] Joined room successfully')
-          // setHasJoined(true)
-          setJoinPhase('joined')
-          window.dispatchEvent(new Event("SESSION_JOINED"));
-        },
-
-
-        onLeaveRoom: () => {
-          console.log('[ZEGO][UIKIT] Left room (UIKit)')
-          cleanupAfterLeave()
-        },
-
-        onUserJoin: (users: any[]) => {
-          console.log('[ZEGO][UIKIT] User joined', users)
-        },
-
-        onUserLeave: (users: any[]) => {
-          console.log('[ZEGO][UIKIT] User left', users)
-        },
-
-        turnOnCameraWhenJoining: false,
-        turnOnMicrophoneWhenJoining: false,
-
-        showMyCameraToggleButton: true,
-        showMyMicrophoneToggleButton: true,
-        showAudioVideoSettingsButton: true,
-        showScreenSharingButton: user?.role === 'trainer',
-        showTextChat: true,
-        showUserList: true
-      })
-
-
-    } catch (err) {
-      console.error('[ZEGO][FRONTEND] Join failed', err)
-      setError('Failed to join meeting')
-      joinLockRef.current = false
-    }
-  }
-
-  const leaveRoom = () => {
-    if (!zpRef.current) return
-    console.log('[SESSION] Manual leave triggered')
-    cleanupAfterLeave()
-  }
-
-
-  function cleanupAfterLeave() {
-    console.log('[SESSION] Cleanup after leave')
-
-    setJoinPhase('left')
-    joinLockRef.current = false
-
-    if (zpRef.current) {
-      zpRef.current.destroy()
-      zpRef.current = null
-    }
-
-    hideZegoRoot();
-    window.dispatchEvent(new Event("SESSION_LEFT"));
-  }
-
-  useEffect(() => {
-    if (!sessionStarted) return
-    if (user?.role !== 'trainer') return
-    if (hasAutoJoinedRef.current) return
-
-    hasAutoJoinedRef.current = true
-    joinRoomWithToken()
-  }, [sessionStarted, user?.role])
-
-  // ending session for all
-  useEffect(() => {
-    const handleSessionEnded = () => {
-      console.log('[SESSION] Session ended globally')
-      cleanupAfterLeave()
-      navigate('/student/sessions')
-    }
-
-    window.addEventListener('SESSION_ENDED', handleSessionEnded)
-    return () =>
-      window.removeEventListener('SESSION_ENDED', handleSessionEnded)
-  }, [])
-
-
-  // UI STATES  
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="loading-dots"><div></div><div></div><div></div><div></div></div>
+  return (
+    <div className="relative bg-gray-900 rounded-xl overflow-hidden aspect-video shadow-lg">
+      <video
+        ref={videoRef}
+        className={`w-full h-full object-cover ${isLocal ? 'scale-x-[-1]' : ''}`}
+        autoPlay
+        muted
+        playsInline
+      />
+      <div className="absolute bottom-3 left-3 bg-black/50 text-white px-3 py-1 rounded-lg text-sm font-medium backdrop-blur-sm">
+        {peer.name} {isLocal && "(You)"}
       </div>
-    )
+    </div>
+  );
+};
+
+// Screen Share Tile Component
+const ScreenShareTile = ({ peer }: { peer: any }) => {
+  const track = useHMSStore(selectScreenShareByPeerID(peer.id));
+  const { videoRef } = useVideo({
+    trackId: track?.id
+  }); 
+
+  if (!track) return null;
+
+  return (
+    <div className="flex items-center justify-center bg-black w-full h-full rounded-xl overflow-hidden">
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        className="w-full h-full object-contain"
+      />
+      <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-lg text-sm font-medium backdrop-blur-sm">
+        {peer.name} • Sharing Screen
+      </div>
+    </div>
+  );
+};
+
+// hat Panel Component
+const ChatPanel = ({ onClose }: { onClose: () => void }) => {
+  const hmsActions = useHMSActions();
+  const messages = useHMSStore(selectHMSMessages);
+  const [input, setInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const sendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    await hmsActions.sendBroadcastMessage(input);
+    setInput("");
+  };
+
+  return (
+    <div className="w-full sm:w-80 bg-gray-800 border-l border-gray-700 flex flex-col h-full absolute right-0 top-0 sm:relative z-20">
+      <div className="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-800">
+        <h3 className="text-white font-bold">Room Chat</h3>
+        <button onClick={onClose} className="text-gray-400 hover:text-white transition">
+          <X size={20} />
+        </button>
+      </div>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+        {messages.length === 0 ? (
+          <div className="text-center text-gray-500 text-sm mt-10">No messages yet. Say hi! 👋</div>
+        ) : (
+          messages.map((msg) => (
+            <div key={msg.id} className="flex flex-col">
+              <span className="text-xs text-gray-400 mb-1 font-medium">
+                {msg.senderName} • {msg.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+              <div className="bg-gray-700 text-white p-3 rounded-xl rounded-tl-none w-fit max-w-[90%] text-sm shadow-sm break-words">
+                {msg.message}
+              </div>
+            </div>
+          ))
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+      <div className="p-3 border-t border-gray-700 bg-gray-800">
+        <form onSubmit={sendMessage} className="flex gap-2">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type a message..."
+            className="flex-1 bg-gray-900 text-white placeholder-gray-500 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-500 transition"
+          />
+          <button 
+            type="submit" 
+            disabled={!input.trim()}
+            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white p-2 rounded-lg transition"
+          >
+            <Send size={18} />
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+//  The Main Room Interface
+const RoomInterface = ({ sessionId, role }: { sessionId: string, role: string }) => {
+  const hmsActions = useHMSActions();
+  const isConnected = useHMSStore(selectIsConnectedToRoom);
+  const peers = useHMSStore(selectPeers);
+  const navigate = useNavigate();
+  
+  const { amIScreenSharing, toggleScreenShare } = useScreenShare();
+  const screenPeer = useHMSStore(selectPeerScreenSharing);
+
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoOff, setIsVideoOff] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
+  const toggleAudio = async () => {
+    await hmsActions.setLocalAudioEnabled(isMuted);
+    setIsMuted(!isMuted);
+  };
+
+  const toggleVideo = async () => {
+    await hmsActions.setLocalVideoEnabled(isVideoOff);
+    setIsVideoOff(!isVideoOff);
+  };
+
+  const leaveRoom = async () => {
+    await hmsActions.leave();
+    navigate(role === 'trainer' ? '/trainer' : '/student');
+  };
+
+  if (!isConnected) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+        <div className="loading-dots mb-4"><div></div><div></div><div></div><div></div></div>
+      </div>
+    );
   }
 
-  if (error || !session) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div>
-          <h2 className="text-xl font-semibold">Session not available</h2>
-          <p className="text-sm text-red-600 mt-2">{error}</p>
-          <button
-            onClick={() => navigate(-1)}
-            className="mt-4 btn-primary"
+  return (
+    <div className="h-screen bg-gray-900 flex overflow-hidden">
+      
+      {/* LEFT SIDE: Video Area */}
+      <div className="flex-1 flex flex-col p-4 relative">
+        <div className="text-white mb-4 flex justify-between items-center">
+          <h2 className="text-xl font-bold">Live Session</h2>
+          <span className="bg-red-500/20 text-red-500 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+            LIVE
+          </span>
+        </div>
+
+        {screenPeer ? (
+          <div className="flex-1 relative bg-black mb-20 rounded-xl overflow-hidden">
+            {/* SCREEN SHARE (MAIN) */}
+            <ScreenShareTile peer={screenPeer} />
+
+            {/* PIP CAMERA GRID (SMALL OVERLAY) */}
+            <div className="absolute bottom-4 right-4 w-48 max-h-[60%] overflow-y-auto bg-black/60 p-2 rounded-xl backdrop-blur-md z-10 custom-scrollbar">
+              <div className="grid grid-cols-1 gap-2">
+                {peers.map((peer) => (
+                  <VideoTile key={peer.id} peer={peer} isLocal={peer.isLocal} />
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-max mb-20 overflow-y-auto">
+            {peers.map((peer) => (
+              <VideoTile key={peer.id} peer={peer} isLocal={peer.isLocal} />
+            ))}
+          </div>
+        )}
+
+        {/* Control Bar */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-gray-800 border border-gray-700 rounded-2xl px-6 py-3 flex gap-3 shadow-2xl z-10">
+          <button onClick={toggleAudio} className={`p-4 rounded-full transition ${isMuted ? 'bg-red-500 text-white' : 'bg-gray-700 text-white hover:bg-gray-600'}`}>
+            {isMuted ? <MicOff size={22} /> : <Mic size={22} />}
+          </button>
+          
+          <button onClick={toggleVideo} className={`p-4 rounded-full transition ${isVideoOff ? 'bg-red-500 text-white' : 'bg-gray-700 text-white hover:bg-gray-600'}`}>
+            {isVideoOff ? <VideoOff size={22} /> : <Video size={22} />}
+          </button>
+          
+          <button onClick={() => toggleScreenShare?.()} className={`p-4 rounded-full transition ${amIScreenSharing ? 'bg-blue-500 text-white' : 'bg-gray-700 text-white hover:bg-gray-600'}`}>
+            <span className="text-sm font-bold block leading-none px-1">{amIScreenSharing ? "Stop Share" : "Share"}</span>
+          </button>
+
+          <button 
+            onClick={() => setIsChatOpen(!isChatOpen)} 
+            className={`p-4 rounded-full transition ml-2 relative ${isChatOpen ? 'bg-blue-600 text-white' : 'bg-gray-700 text-white hover:bg-gray-600'}`}
           >
-            Go back
+            <MessageSquare size={22} />
+          </button>
+          
+          <button onClick={leaveRoom} className="p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition ml-4">
+            <PhoneOff size={22} />
           </button>
         </div>
       </div>
-    )
+
+      {/* RIGHT SIDE: Chat Panel */}
+      {isChatOpen && <ChatPanel onClose={() => setIsChatOpen(false)} />}
+      
+    </div>
+  );
+};
+
+// The API Connection Component
+const SessionRoom = () => {
+  const { sessionId } = useParams();
+  const [searchParams] = useSearchParams();
+  const roomId = searchParams.get('roomId');
+  const navigate = useNavigate();
+  
+  const [error, setError] = useState("");
+  const hmsActions = useHMSActions();
+  const notification = useHMSNotifications(); 
+
+  const joinInitiated = useRef(false);
+
+  const userStr = localStorage.getItem('user');
+  const currentUser = userStr ? JSON.parse(userStr) : {};
+  const role = currentUser.role || 'student'; 
+
+  useEffect(() => {
+    if (!notification) return;
+
+    if (notification.type === 'ERROR') {
+      console.error("[100ms Background Error]:", notification.data);
+      setError(notification.data?.message || "100ms Connection Error");
+    }
+
+    // Force students out when trainer ends the room
+    if (notification.type === HMSNotificationTypes.ROOM_ENDED || notification.type === HMSNotificationTypes.REMOVED_FROM_ROOM) {
+      alert("The trainer has ended this session.");
+      navigate(role === 'trainer' ? '/trainer' : '/student');
+    }
+  }, [notification, navigate, role]);
+
+  useEffect(() => {
+    if (!sessionId || joinInitiated.current) return;
+
+    const join100msSession = async () => {
+      joinInitiated.current = true; 
+
+      try {
+        const authToken = localStorage.getItem('token');
+        if (!authToken) {
+          setError("You must be logged in to join a session.");
+          return;
+        }
+
+        const response = await axios.post(
+          `${API_BASE_URL}/api/sessions/join-room`,
+          { session_id: sessionId, role: role },
+          { headers: { Authorization: `Bearer ${authToken}` } }
+        );
+
+        if (response.data.success && response.data.token) {
+          await hmsActions.join({
+            userName: currentUser.name || "User",
+            authToken: response.data.token,
+          });
+        }
+      } catch (err: any) {
+        console.error("Error joining 100ms session:", err);
+        setError(err.response?.data?.message || "Failed to join session. Please try again.");
+        joinInitiated.current = false; 
+      }
+    };
+
+    join100msSession();
+  }, [sessionId, hmsActions, role, currentUser.name]);
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-red-100 text-center">
+          <p className="text-red-500 font-bold mb-4">{error}</p>
+          <button onClick={() => window.history.back()} className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium">
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
   }
 
-  // Rendering  
-  return (
-    <>
-      <div className="min-h-screen bg-fixed"
-        style={{
-          backgroundImage:
-            `url(${bg_main})`,
-          position: "relative",
-          backgroundSize: "cover",
-          backgroundPosition: "right bottom",
-          backgroundRepeat: "no-repeat",
-          width: "100%",
-        }}>
-        {/* HEADER */}
-        <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b">
-          <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
+  return <RoomInterface sessionId={sessionId as string} role={role} />;
+};
 
-            {/* LEFT */}
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate('/')}
-                disabled={joinPhase === 'joined'}
-                className={`font-bold text-lg ${joinPhase === 'joined'
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-indigo-700 hover:opacity-80'
-                  }`}
-              >
-                LearniLM🌎World
-              </button>
+const SessionRoomWrapper = () => (
+  <HMSRoomProvider>
+    <SessionRoom />
+  </HMSRoomProvider>
+);
 
-              <span className="text-sm text-gray-500">
-                {session.title} • {session.trainer.name}
-              </span>
-            </div>
-
-            {/* RIGHT */}
-            <div className="flex items-center gap-3">
-
-              {/* STUDENT: FIRST JOIN */}
-              {joinPhase === 'idle' &&
-                sessionStarted &&
-                user?.role === 'student' && (
-                  <button
-                    onClick={joinRoomWithToken}
-                    className="px-4 py-1.5 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700"
-                  >
-                    Join Now
-                  </button>
-                )}
-
-              {/* STUDENT: REJOIN */}
-              {joinPhase === 'left' &&
-                sessionStarted &&
-                user?.role === 'student' && (
-                  <button
-                    onClick={joinRoomWithToken}
-                    className="px-4 py-1.5 rounded-md bg-indigo-600 text-white text-sm hover:bg-indigo-700"
-                  >
-                    Rejoin
-                  </button>
-                )}
-
-
-              {/* LEAVE */}
-              {joinPhase === 'joined' && (
-                <button
-                  onClick={leaveRoom}
-                  className="px-4 py-1.5 rounded-md bg-red-500 text-white text-sm hover:bg-red-600"
-                >
-                  Leave
-                </button>
-              )}
-
-              {/* TRAINER: END SESSION */}
-              {user?.role === 'trainer' && joinPhase !== 'idle' && (
-                <button
-                  onClick={endSession}
-                  className="px-4 py-1.5 rounded-md bg-red-600 text-white text-sm hover:bg-red-700"
-                >
-                  End Session
-                </button>
-              )}
-
-              {/* BACK */}
-              <button
-                disabled={joinPhase === 'joined'}
-                onClick={() => navigate(-1)}
-                className={`text-sm ${joinPhase === 'joined'
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : 'text-gray-600 hover:text-gray-900'
-                  }`}
-              >
-                Back
-              </button>
-            </div>
-          </div>
-        </header>
-
-
-        <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-          {/* for studnets arrival */}
-          {joinPhase === 'idle' && sessionStarted && user?.role === 'student' && (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                Session is live
-              </h2>
-
-              <p className="mt-2 text-gray-600 max-w-md">
-                Your trainer has started the session.
-                Click below to join the live class.
-              </p>
-
-              <button
-                onClick={joinRoomWithToken}
-                className="mt-6 px-6 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700"
-              >
-                Join Session
-              </button>
-            </div>
-          )}
-
-          {/* after leaving */}
-          {joinPhase === 'left' && (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-              <h2 className="text-2xl font-semibold text-gray-800">
-                You’ve left the session
-              </h2>
-
-              <p className="mt-2 text-gray-600 max-w-md">
-                {user?.role === 'trainer'
-                  ? 'You can rejoin the session or officially end it if the timing is over.'
-                  : 'You may rejoin if the session is still ongoing. Once the session ends, you’ll be able to leave a review.'}
-              </p>
-
-              <div className="mt-6 flex gap-4">
-                <button
-                  onClick={joinRoomWithToken}
-                  className="px-6 py-2 rounded-md bg-[#F64EBB] text-white hover:bg-[#6B48AF]"
-                >
-                  Rejoin Session
-                </button>
-
-                <button
-                  onClick={() => navigate(-1)}
-                  className="px-6 py-2 rounded-md border border-gray-300 bg-[#6B48AF] text-white hover:bg-[#F64EBB]"
-                >
-                  Go Back
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* JOINING OVERLAY (React-only layer) */}
-          <JoiningOverlay visible={sessionStarted && joinPhase === 'joining'} />
-
-        </main>
-      </div>
-    </>
-
-  )
-
-}
-
-export default SessionRoom
+export default SessionRoomWrapper;
