@@ -110,7 +110,7 @@ const TrainerCard: React.FC<Props> = ({ trainer, learningType, sessionMode }) =>
       ) : (
         <div className="mb-5 w-full h-44 bg-[#e9f1fb] rounded-2xl overflow-hidden flex items-center justify-center">
           {previewLink
-            ? <img src={previewLink} alt={trainer.name || 'Trainer'} className="w-full h-full object-cover" />
+            ? <img src={previewLink} alt={trainer.name || 'Trainer'} className="w-full h-full object-cover object-top" />
             : <User className="h-10 w-10 text-[#5186cd]" />}
         </div>
       )}

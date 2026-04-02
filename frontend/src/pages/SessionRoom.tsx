@@ -13,7 +13,10 @@ import {
   useVideo,
   useHMSNotifications,
   selectHMSMessages,         // Added for Chat
-  HMSNotificationTypes       // Added for Kick-out logic
+  HMSNotificationTypes,       // Added for Kick-out logic
+  selectIsPeerVideoEnabled,  //for video on/off status
+  selectIsPeerAudioEnabled,  //for audio on/off status
+  selectLocalPeer,          //for perfectly redirecting the student or trainer to their particular dashboard
 } from '@100mslive/react-sdk';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Send, MessageSquare, X } from 'lucide-react';
 
@@ -25,18 +28,46 @@ const VideoTile = ({ peer, isLocal }: { peer: any, isLocal: boolean }) => {
     trackId: peer.videoTrack
   });
 
+  //to check if video/audio is on or off for the peer
+  const isVideoOn = useHMSStore(selectIsPeerVideoEnabled(peer.id));
+  const isAudioOn = useHMSStore(selectIsPeerAudioEnabled(peer.id));
+  
+  const initials = peer.name
+    ?.split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase();
+
   return (
     <div className="relative bg-gray-900 rounded-xl overflow-hidden aspect-video shadow-lg">
-      <video
-        ref={videoRef}
-        className={`w-full h-full object-cover ${isLocal ? 'scale-x-[-1]' : ''}`}
-        autoPlay
-        muted
-        playsInline
-      />
+
+      {/* 🎥 VIDEO OR AVATAR */}
+      {isVideoOn ? (
+        <video
+          ref={videoRef}
+          className={`w-full h-full object-cover ${isLocal ? 'scale-x-[-1]' : ''}`}
+          autoPlay
+          muted
+          playsInline
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-3xl font-semibold">
+          {initials}
+        </div>
+      )}
+
+      {/* 👤 NAME TAG */}
       <div className="absolute bottom-3 left-3 bg-black/50 text-white px-3 py-1 rounded-lg text-sm font-medium backdrop-blur-sm">
         {peer.name} {isLocal && "(You)"}
       </div>
+
+      {/* 🎤 MIC OFF INDICATOR */}
+      {!isAudioOn && (
+        <div className="absolute bottom-3 right-3 bg-red-500 p-2 rounded-full shadow-md">
+          <MicOff size={16} />
+        </div>
+      )}
+
     </div>
   );
 };
@@ -135,6 +166,7 @@ const RoomInterface = ({ sessionId, role }: { sessionId: string, role: string })
   const hmsActions = useHMSActions();
   const isConnected = useHMSStore(selectIsConnectedToRoom);
   const peers = useHMSStore(selectPeers);
+  const localPeer = useHMSStore(selectLocalPeer);
   const navigate = useNavigate();
   
   const { amIScreenSharing, toggleScreenShare } = useScreenShare();
@@ -156,7 +188,16 @@ const RoomInterface = ({ sessionId, role }: { sessionId: string, role: string })
 
   const leaveRoom = async () => {
     await hmsActions.leave();
-    navigate(role === 'trainer' ? '/trainer' : '/student');
+    const isAdmin = localPeer?.roleName === 'admin' || role === 'admin';
+    const isTrainer = localPeer?.roleName === 'host' || role === 'trainer';
+
+    if (isAdmin) {
+      navigate('/admin/sessions');
+    } else if (isTrainer) {
+      navigate('/trainer');
+    } else {
+      navigate('/student');
+    }
   };
 
   if (!isConnected) {
@@ -250,11 +291,21 @@ const SessionRoom = () => {
   const joinInitiated = useRef(false);
 
   const userStr = localStorage.getItem('user');
-  const currentUser = userStr ? JSON.parse(userStr) : {};
-  const role = currentUser.role || 'student'; 
+  let currentUser: any = {};
+  try { currentUser = userStr ? JSON.parse(userStr) : {}; } catch(e) {}
+  
+  const roleStr = currentUser?.role || currentUser?.user?.role || 'student';
+  let role = roleStr.toLowerCase();
+  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+  console.log(currentUser)
+  if (currentUser?.email === adminEmail || currentUser?.user?.email === adminEmail) {
+    role = 'admin';
+  }
 
   useEffect(() => {
     if (!notification) return;
+
+    const localPeer = useHMSStore(selectLocalPeer);
 
     if (notification.type === 'ERROR') {
       console.error("[100ms Background Error]:", notification.data);
@@ -263,8 +314,18 @@ const SessionRoom = () => {
 
     // Force students out when trainer ends the room
     if (notification.type === HMSNotificationTypes.ROOM_ENDED || notification.type === HMSNotificationTypes.REMOVED_FROM_ROOM) {
-      alert("The trainer has ended this session.");
-      navigate(role === 'trainer' ? '/trainer' : '/student');
+      alert("The session has ended.");
+      
+      const isAdmin = localPeer?.roleName === 'admin' || role === 'admin';
+      const isTrainer = localPeer?.roleName === 'host' || role === 'trainer';
+
+      if (isAdmin) {
+        navigate('/admin/sessions');
+      } else if (isTrainer) {
+        navigate('/trainer');
+      } else {
+        navigate('/student');
+      }
     }
   }, [notification, navigate, role]);
 
@@ -286,10 +347,9 @@ const SessionRoom = () => {
           { session_id: sessionId, role: role },
           { headers: { Authorization: `Bearer ${authToken}` } }
         );
-
         if (response.data.success && response.data.token) {
           await hmsActions.join({
-            userName: currentUser.name || "User",
+            userName: response.data.userName || "User",
             authToken: response.data.token,
           });
         }

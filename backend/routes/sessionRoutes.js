@@ -218,10 +218,10 @@ router.get('/:id', authenticate, async (req, res) => {
 
 // 100ms: Join Room & Get Auth Token
 router.post('/join-room', authenticate, async (req, res) => {
-  const { session_id, role } = req.body;
+  const { session_id} = req.body;
   console.log("before const")
   
-  if (!session_id || !role) {
+  if (!session_id) {
     return res.status(400).json({ success: false, msg: "session_id and role are required" });
   }
   console.log("before try")
@@ -234,7 +234,7 @@ router.post('/join-room', authenticate, async (req, res) => {
 
     const isTrainerOwner = session.trainer.toString() === req.user._id.toString();
     const isStudent = session.students.some(s => s.toString() === req.user._id.toString());
-    const isAdmin = req.user.role === 'admin';
+    const isAdmin = (req.user.role === 'admin') || (req.user.email === process.env.ADMIN_EMAIL);
 
     if (!isTrainerOwner && !isStudent && !isAdmin) {
       return res.status(403).json({ message: 'Access denied' })
@@ -249,11 +249,9 @@ router.post('/join-room', authenticate, async (req, res) => {
 
     let hmsRole = "student"; 
     
-    if (role === 'trainer') {
-      hmsRole = "host";
-    } else if (role === 'student') {
-      hmsRole = "student";
-    } else if (role === 'admin') {
+    if (isTrainerOwner) {
+      hmsRole = "host"; 
+    } else if (isAdmin) {
       hmsRole = "admin";
     }
 
@@ -268,6 +266,8 @@ router.post('/join-room', authenticate, async (req, res) => {
       success: true,
       token,
       roomData: roomData,
+      userName: req.user.name,
+      hmsRole: hmsRole,
       msg: "Joined room successfully!",
     });
   } catch (err) {
@@ -281,7 +281,7 @@ router.post('/join-room', authenticate, async (req, res) => {
 
 
 //100ms Force end session (Trainer/Admin)
-router.post('/end-room/:id', authenticate, authorize(['trainer', 'admin']), async (req, res) => {
+router.post('/end-room/:id', authenticate, async (req, res) => {
   try {
     const session = await Session.findById(req.params.id)
 
@@ -289,17 +289,16 @@ router.post('/end-room/:id', authenticate, authorize(['trainer', 'admin']), asyn
       return res.status(404).json({ message: 'Session not found' })
     }
 
-    if (
-      req.user.role === 'trainer' &&
-      session.trainer.toString() !== req.user._id.toString()
-    ) {
+    const isTrainerOwner = req.user.role === 'trainer' && session.trainer.toString() === req.user._id.toString();
+    const isAdmin = req.user.email === process.env.ADMIN_EMAIL;
+
+    if (!isTrainerOwner && !isAdmin) {
       return res.status(403).json({ message: 'Access denied' })
     }
 
     const room_id = session.roomId;
 
     if (room_id) {
-        // Disable the room on 100ms to immediately end it
         try {
             const payload = { enabled: false };
             await apiService.post(`/rooms/${room_id}`, payload);
@@ -312,19 +311,9 @@ router.post('/end-room/:id', authenticate, authorize(['trainer', 'admin']), asyn
     session.status = 'ended'
     await session.save()
 
-    await Booking.updateMany(
-      { sessionId: session._id },
-      { status: 'completed' }
-    )
-
-    await User.findByIdAndUpdate(session.trainer, {
-      $inc: { 'stats.completedSessions': 1 }
-    })
-
-    await User.updateMany(
-      { _id: { $in: session.students } },
-      { $inc: { 'stats.completedSessions': 1 } }
-    )
+    await Booking.updateMany({ sessionId: session._id }, { status: 'completed' })
+    await User.findByIdAndUpdate(session.trainer, { $inc: { 'stats.completedSessions': 1 } })
+    await User.updateMany({ _id: { $in: session.students } }, { $inc: { 'stats.completedSessions': 1 } })
 
     res.json({ success: true, message: 'Session ended' })
   } catch (err) {

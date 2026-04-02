@@ -145,7 +145,7 @@ const BecomeTrainer: React.FC = () => {
                   <div className="translate-y-8">
                     <motion.button
                       onClick={() => navigate("/register?role=trainer")}
-                      className="py-4 px-5 bg-[#276dc9] text-white font-semibold text-lg rounded-full w-fit   shadow-lg hover:bg-[#205eb0]"
+                      className="py-4 px-5 bg-[#024AAC] text-white font-semibold text-lg rounded-full w-fit   shadow-lg "
                       whileHover={{ scale: 1.05 }}
                     >
                       Become a Trainer Today
@@ -162,7 +162,7 @@ const BecomeTrainer: React.FC = () => {
                 >
                   {/* Dark Blue Div Behind Image */}
                   <div className="absolute inset-0 flex justify-end items-end z-[-1]">
-                    <div className="bg-[#0A1172] w-full h-4/5 rounded-tl-[120px] lg:rounded-tl-[160px]  rounded-br-[40px] translate-x-8 lg:translate-x-0 translate-y-12 lg:translate-y-7 "></div>
+                    <div className="bg-[#203989] w-full h-4/5 rounded-tl-[120px] lg:rounded-tl-[160px]  rounded-br-[40px] translate-x-8 lg:translate-x-0 translate-y-12 lg:translate-y-7 "></div>
                   </div>
                   <img
                     src={image4}
