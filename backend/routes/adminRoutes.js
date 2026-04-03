@@ -224,7 +224,7 @@ router.patch('/users/:id/verify', async (req, res) => {
 
 
 
-// ----------trainers---------
+//student
 //fetch all the student
 router.get('/students', async (req, res) => {
     try {
@@ -253,7 +253,7 @@ router.get('/students', async (req, res) => {
                 return {
                     ...student.toObject(),
                     dashboardStats: {
-                        totalSessions: sessions.length,
+                        totalSessions: student?.stats?.totalSessions||0,
                         completedSessions: student?.stats?.completedSessions || 0,
                         upcomingSessions: sessions.filter(s => s.status === 'scheduled').length,
                         // totalStudents: students,
@@ -272,7 +272,7 @@ router.get('/students', async (req, res) => {
     }
 })
 
-
+// ----------trainers---------
 // Fetch all trainers with their stats
 router.get('/trainers', async (req, res) => {
     try {

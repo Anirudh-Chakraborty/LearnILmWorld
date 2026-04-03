@@ -8,27 +8,24 @@ import {
   selectIsConnectedToRoom,
   selectPeers,
   selectPeerScreenSharing,
-  selectScreenShareByPeerID, // For Screen Sharing
+  selectScreenShareByPeerID, 
   useScreenShare,
   useVideo,
   useHMSNotifications,
-  selectHMSMessages,         // Added for Chat
-  HMSNotificationTypes,       // Added for Kick-out logic
-  selectIsPeerVideoEnabled,  //for video on/off status
-  selectIsPeerAudioEnabled,  //for audio on/off status
-  selectLocalPeer,          //for perfectly redirecting the student or trainer to their particular dashboard
+  selectHMSMessages,         
+  HMSNotificationTypes,       
+  selectIsPeerVideoEnabled,  
+  selectIsPeerAudioEnabled,
+  selectLocalPeer,          
 } from '@100mslive/react-sdk';
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Send, MessageSquare, X } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-// Video Tile Component 
+//  Video Tile Component 
 const VideoTile = ({ peer, isLocal }: { peer: any, isLocal: boolean }) => {
-  const { videoRef } = useVideo({
-    trackId: peer.videoTrack
-  });
+  const { videoRef } = useVideo({ trackId: peer.videoTrack });
 
-  //to check if video/audio is on or off for the peer
   const isVideoOn = useHMSStore(selectIsPeerVideoEnabled(peer.id));
   const isAudioOn = useHMSStore(selectIsPeerAudioEnabled(peer.id));
   
@@ -40,8 +37,7 @@ const VideoTile = ({ peer, isLocal }: { peer: any, isLocal: boolean }) => {
 
   return (
     <div className="relative bg-gray-900 rounded-xl overflow-hidden aspect-video shadow-lg">
-
-      {/* 🎥 VIDEO OR AVATAR */}
+      {/* VIDEO OR AVATAR */}
       {isVideoOn ? (
         <video
           ref={videoRef}
@@ -56,18 +52,17 @@ const VideoTile = ({ peer, isLocal }: { peer: any, isLocal: boolean }) => {
         </div>
       )}
 
-      {/* 👤 NAME TAG */}
+      {/* NAME TAG */}
       <div className="absolute bottom-3 left-3 bg-black/50 text-white px-3 py-1 rounded-lg text-sm font-medium backdrop-blur-sm">
         {peer.name} {isLocal && "(You)"}
       </div>
 
-      {/* 🎤 MIC OFF INDICATOR */}
+      {/* MIC OFF INDICATOR */}
       {!isAudioOn && (
         <div className="absolute bottom-3 right-3 bg-red-500 p-2 rounded-full shadow-md">
           <MicOff size={16} />
         </div>
       )}
-
     </div>
   );
 };
@@ -75,9 +70,7 @@ const VideoTile = ({ peer, isLocal }: { peer: any, isLocal: boolean }) => {
 // Screen Share Tile Component
 const ScreenShareTile = ({ peer }: { peer: any }) => {
   const track = useHMSStore(selectScreenShareByPeerID(peer.id));
-  const { videoRef } = useVideo({
-    trackId: track?.id
-  }); 
+  const { videoRef } = useVideo({ trackId: track?.id }); 
 
   if (!track) return null;
 
@@ -96,7 +89,7 @@ const ScreenShareTile = ({ peer }: { peer: any }) => {
   );
 };
 
-// hat Panel Component
+// Chat Panel Component
 const ChatPanel = ({ onClose }: { onClose: () => void }) => {
   const hmsActions = useHMSActions();
   const messages = useHMSStore(selectHMSMessages);
@@ -161,7 +154,7 @@ const ChatPanel = ({ onClose }: { onClose: () => void }) => {
   );
 };
 
-//  The Main Room Interface
+// The Main Room Interface
 const RoomInterface = ({ sessionId, role }: { sessionId: string, role: string }) => {
   const hmsActions = useHMSActions();
   const isConnected = useHMSStore(selectIsConnectedToRoom);
@@ -223,10 +216,7 @@ const RoomInterface = ({ sessionId, role }: { sessionId: string, role: string })
 
         {screenPeer ? (
           <div className="flex-1 relative bg-black mb-20 rounded-xl overflow-hidden">
-            {/* SCREEN SHARE (MAIN) */}
             <ScreenShareTile peer={screenPeer} />
-
-            {/* PIP CAMERA GRID (SMALL OVERLAY) */}
             <div className="absolute bottom-4 right-4 w-48 max-h-[60%] overflow-y-auto bg-black/60 p-2 rounded-xl backdrop-blur-md z-10 custom-scrollbar">
               <div className="grid grid-cols-1 gap-2">
                 {peers.map((peer) => (
@@ -287,32 +277,34 @@ const SessionRoom = () => {
   const [error, setError] = useState("");
   const hmsActions = useHMSActions();
   const notification = useHMSNotifications(); 
+  
+  const isConnected = useHMSStore(selectIsConnectedToRoom);
+  const localPeer = useHMSStore(selectLocalPeer); 
 
-  const joinInitiated = useRef(false);
+  const hasJoinedRef = useRef(false);
 
+  // Deep Role & ENV Check
   const userStr = localStorage.getItem('user');
   let currentUser: any = {};
   try { currentUser = userStr ? JSON.parse(userStr) : {}; } catch(e) {}
   
-  const roleStr = currentUser?.role || currentUser?.user?.role || 'student';
+  let roleStr = currentUser?.role || currentUser?.user?.role || 'student';
   let role = roleStr.toLowerCase();
+  
   const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
-  console.log(currentUser)
   if (currentUser?.email === adminEmail || currentUser?.user?.email === adminEmail) {
     role = 'admin';
   }
 
+  // Handle Notifications (Kickouts)
   useEffect(() => {
     if (!notification) return;
-
-    const localPeer = useHMSStore(selectLocalPeer);
 
     if (notification.type === 'ERROR') {
       console.error("[100ms Background Error]:", notification.data);
       setError(notification.data?.message || "100ms Connection Error");
     }
 
-    // Force students out when trainer ends the room
     if (notification.type === HMSNotificationTypes.ROOM_ENDED || notification.type === HMSNotificationTypes.REMOVED_FROM_ROOM) {
       alert("The session has ended.");
       
@@ -327,13 +319,14 @@ const SessionRoom = () => {
         navigate('/student');
       }
     }
-  }, [notification, navigate, role]);
+  }, [notification, navigate, role, localPeer]);
 
+  // Handle Joining Room 
   useEffect(() => {
-    if (!sessionId || joinInitiated.current) return;
+    if (!sessionId || hasJoinedRef.current || isConnected) return;
 
     const join100msSession = async () => {
-      joinInitiated.current = true; 
+      hasJoinedRef.current = true; 
 
       try {
         const authToken = localStorage.getItem('token');
@@ -347,21 +340,48 @@ const SessionRoom = () => {
           { session_id: sessionId, role: role },
           { headers: { Authorization: `Bearer ${authToken}` } }
         );
+        
         if (response.data.success && response.data.token) {
           await hmsActions.join({
-            userName: response.data.userName || "User",
+            userName: response.data.userName || currentUser.name || "User",
             authToken: response.data.token,
           });
         }
       } catch (err: any) {
         console.error("Error joining 100ms session:", err);
         setError(err.response?.data?.message || "Failed to join session. Please try again.");
-        joinInitiated.current = false; 
+        hasJoinedRef.current = false; // Reset on failure (from SessionRoom1)
       }
     };
 
     join100msSession();
-  }, [sessionId, hmsActions, role, currentUser.name]);
+  }, [sessionId, hmsActions, role, currentUser.name, isConnected]);
+
+  // Handle Unmount Cleanup 
+  useEffect(() => {
+    return () => {
+      hmsActions.leave();
+      hasJoinedRef.current = false;
+    };
+  }, [hmsActions]);
+
+  // Handle Popstate (Browser Back Button)
+  useEffect(() => {
+    const handleBack = async () => {
+      try {
+        await hmsActions.leave();
+        hasJoinedRef.current = false;
+      } catch (err) {
+        console.error("Error leaving room:", err);
+      }
+    };
+
+    window.addEventListener("popstate", handleBack);
+
+    return () => {
+      window.removeEventListener("popstate", handleBack);
+    };
+  }, [hmsActions]);
 
   if (error) {
     return (

@@ -62,9 +62,9 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
           {/* DESKTOP NAV */}
           <nav className="hidden lg:flex items-center gap-8">
 
-            {variant === "main" && (
+            {/* {variant === "main" && (
               <CurrencySelector variant="header" />
-            )}
+            )} */}
 
             {!isLoggedIn || isAdmin  ? (
               <>
@@ -196,12 +196,12 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
               <Offcanvas.Body>
                 <Nav className="flex-column gap-4">
                   {/*  Currency selector in mobile (main variant only) */}
-                  {variant === "main" && (
+                  {/* {variant === "main" && (
                     <CurrencySelector
                       variant="header"
                       onSelect={() => setShowOffcanvas(false)}
                     />
-                  )}
+                  )} */}
 
                   {!isLoggedIn || isAdmin ? (
                     <>
