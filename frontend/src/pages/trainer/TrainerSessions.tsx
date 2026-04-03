@@ -1,20 +1,16 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Calendar, Video, Clock, User, Plus } from "lucide-react";
 import ManageClasses from "../../components/ManageClasses";
-import moment from "moment-timezone";
-import { useAuth } from "../../contexts/AuthContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const TrainerSessions = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
-  const trainerTz = user?.profile?.timezone || moment.tz.guess();
 
   useEffect(() => {
     fetchSessions();
@@ -42,21 +38,18 @@ const TrainerSessions = () => {
 
       // 2. Group the bookings together
       rawPendingBookings.forEach((b: any) => {
-        
-        // --- FIXED DATE PARSING LOGIC ---
+        // Robust date parsing
         let safeDate = new Date();
-        
-        // If 'time' already contains the full valid ISO string, use it directly!
-        if (b.time && !isNaN(new Date(b.time).getTime())) {
-          safeDate = new Date(b.time);
-        } 
-        // Fallback for older bookings
-        else if (b.date && b.time) {
+        if (b.date && b.time) {
           const combined = new Date(`${b.date}T${b.time}`);
           if (!isNaN(combined.getTime())) safeDate = combined;
           else if (!isNaN(new Date(b.date).getTime())) safeDate = new Date(b.date);
+        } else if (b.date) {
+          const parsedDate = new Date(b.date);
+          if (!isNaN(parsedDate.getTime())) safeDate = parsedDate;
         } else if (b.startTime) {
-          safeDate = new Date(b.startTime);
+          const parsedStart = new Date(b.startTime);
+          if (!isNaN(parsedStart.getTime())) safeDate = parsedStart;
         }
 
         if (b.bookingType === 'group') {
@@ -64,8 +57,8 @@ const TrainerSessions = () => {
           const key = `${b.date}_${b.time}`;
           if (!pendingGroupMap.has(key)) {
             pendingGroupMap.set(key, {
-              _id: b._id, 
-              bookingIds: [b._id], 
+              _id: b._id, // We use the first booking's ID as the main key
+              bookingIds: [b._id], // Array to store all booking IDs for this group
               isPendingBooking: true,
               title: `Group Class`,
               scheduledDate: safeDate,
@@ -74,16 +67,17 @@ const TrainerSessions = () => {
               students: b.student ? [b.student] : []
             });
           } else {
+            // If the group already exists, add this student and their booking ID to it!
             const existingGroup = pendingGroupMap.get(key);
             existingGroup.bookingIds.push(b._id);
             if (b.student) existingGroup.students.push(b.student);
           }
         } else {
-          // PRIVATE SESSIONS
+          // PRIVATE SESSIONS: Keep them completely separate
           pendingPrivate.push({
             ...b,
             _id: b._id,
-            bookingIds: [b._id],
+            bookingIds: [b._id], // Array with just 1 ID
             isPendingBooking: true,
             title: `Private Class`,
             scheduledDate: safeDate,
@@ -94,12 +88,11 @@ const TrainerSessions = () => {
         }
       });
 
+      // Combine private classes and grouped classes
       const pendingBookings = [...pendingPrivate, ...Array.from(pendingGroupMap.values())];
 
-      // Format Active Sessions 
-      const activeSessions = Array.isArray(sessionsRes.data) ? sessionsRes.data
-        .filter((s: any) => s.status !== 'ended') // Dont show the ended session
-        .map((s: any) => {
+      // Format Active Sessions
+      const activeSessions = Array.isArray(sessionsRes.data) ? sessionsRes.data.map((s: any) => {
           let sDate = new Date();
           if (s.scheduledDate && !isNaN(new Date(s.scheduledDate).getTime())) {
               sDate = new Date(s.scheduledDate);
@@ -110,17 +103,9 @@ const TrainerSessions = () => {
       }) : [];
 
       // Merge both lists and sort by date
-      const allUpcoming = [...activeSessions, ...pendingBookings].sort((a, b) => {
-        const timeA = new Date(a.scheduledDate).getTime();
-        const timeB = new Date(b.scheduledDate).getTime();
-
-        // Push any invalid/missing dates to the very bottom of the list
-        if (isNaN(timeA)) return 1;
-        if (isNaN(timeB)) return -1;
-
-        // Sort chronologically (Earliest date and time appears first)
-        return timeA - timeB; 
-      });
+      const allUpcoming = [...activeSessions, ...pendingBookings].sort(
+        (a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime()
+      );
 
       setSessions(allUpcoming);
     } catch (err) {
@@ -134,6 +119,8 @@ const TrainerSessions = () => {
   const updateSessionStatus = async (sessionId: string, status: string, roomId?: string) => {
     const token = localStorage.getItem("token");
     await axios.put(
+      // If roomId is provided, it means we're starting a session 
+      // and need to save that roomId in the backend for future joins
       `${API_BASE_URL}/api/sessions/${sessionId}/status`,
       { status, roomId },
       { headers: { Authorization: `Bearer ${token}` } }
@@ -150,6 +137,7 @@ const TrainerSessions = () => {
       let generatedRoomId = item.roomId;
 
       if (item.isPendingBooking) {
+        // Send ALL grouped booking IDs to the backend!
         const roomRes = await axios.post(
           `${API_BASE_URL}/api/sessions/create-room`,
           {
@@ -158,6 +146,7 @@ const TrainerSessions = () => {
             duration: item.duration,
             scheduledDate: item.scheduledDate,
             region: "in",
+            // --- ADDED FALLBACKS TO PREVENT MONGOOSE 400 ERRORS ---
             language: "English", 
             level: "beginner",
             description: "Live Class",
@@ -174,6 +163,7 @@ const TrainerSessions = () => {
       navigate(`/session/${targetSessionId}?roomId=${generatedRoomId}`);
     } catch (err: any) {
       console.error("Failed to start session:", err);
+      // --- UPDATED ALERT TO SHOW EXACT BACKEND ERROR ---
       const errorMsg = err.response?.data?.message || err.message || "Unknown error";
       alert(`Could not start session.\nError from server: ${errorMsg}`);
     }
@@ -193,6 +183,7 @@ const TrainerSessions = () => {
       const token = localStorage.getItem("token");
       if (session.roomId) {
         await axios.post(
+          //End the 100ms room first to kick everyone out
           `${API_BASE_URL}/api/sessions/end-room/${session._id}`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
@@ -240,25 +231,21 @@ const TrainerSessions = () => {
             {sessions.map((session) => {
               const safeDateObj = new Date(session.scheduledDate);
               const isValidDate = !isNaN(safeDateObj.getTime());
-              let displayDate = "Date Pending";
-              let displayStartTime = "Time Pending";
-              let displayEndTime = "";
               
-              // let endTimeStr = "Time Pending";
+              let endTimeStr = "Time Pending";
               if (isValidDate) {
-                const startMoment = moment(safeDateObj).tz(trainerTz);
-                const endMoment = moment(safeDateObj).add((session.duration || 60), 'minutes').tz(trainerTz);
-
-                displayDate = startMoment.format('ddd, MMM D, YYYY');
-                displayStartTime = startMoment.format('hh:mm A');
-                displayEndTime = endMoment.format('hh:mm A');
+                 const endObj = new Date(safeDateObj);
+                 endObj.setMinutes(endObj.getMinutes() + (session.duration || 60));
+                 endTimeStr = endObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
               }
 
+              // SMART STUDENT NAME DISPLAY LOGIC
               let studentDisplay = `${session.students?.length || 0} students enrolled`;
               if (session.students?.length === 1 && session.students[0]?.name) {
-                 studentDisplay = session.students[0].name;
+                 studentDisplay = session.students[0].name; // e.g., "Aman"
               } else if (session.students?.length > 1) {
-                 studentDisplay = session.students.map((s: any) => s.name).join(', ');
+                 // For grouped classes, join all student names with commas
+                 studentDisplay = session.students.map((s: any) => s.name).join(', '); // e.g., "Aman, Rahul, Priya"
               }
 
               return (
@@ -278,24 +265,34 @@ const TrainerSessions = () => {
                       </h3>
                       <p className="flex items-center gap-2 text-sm">
                         <Calendar className="w-4 h-4 text-gray-400" />
-                        <span>{displayDate}</span>
+                        <span>
+                          {isValidDate ? safeDateObj.toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          }) : "Date Pending"}
+                        </span>
                       </p>
                       <p className="flex items-center text-sm gap-2">
                         <Clock className="w-4 h-4 text-gray-400" />
                         <span>
-                          {displayStartTime}
-                          {displayEndTime && ` - ${displayEndTime}`}
+                          {isValidDate ? safeDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Time Pending"}
+                          {' - '}
+                          {endTimeStr}
                         </span>
                       </p>
                       <p className="text-blue-500 gap-2 flex items-center font-medium text-sm mt-1">
                         <span>
                           <User className="w-4 h-4" />
                         </span>
+                        {/* Display the names here! */}
                         {studentDisplay}
                       </p>
                     </div>
                   </div>
 
+                  {/* Status + Actions */}
                   <div className="flex flex-row sm:flex-col gap-2 justify-center items-center ">
                     <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-200 self-start sm:self-auto">
                       {(session.status || "scheduled").toUpperCase()}

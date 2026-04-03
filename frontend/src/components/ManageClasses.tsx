@@ -1,25 +1,23 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
-import { X } from 'lucide-react';
 
 interface ManageClassesProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const ManageClasses = ({ isOpen, onClose }: ManageClassesProps) => {
+const ManageClasses: React.FC<ManageClassesProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [startTime, setStartTime] = useState('');
-  const durationMinutes = 90
+  const durationMinutes = 90;
   const [price, setPrice] = useState<number>(15);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-if (!isOpen) return null
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -57,27 +55,31 @@ if (!isOpen) return null
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-      <div className="bg-white rounded-2xl p-8 shadow-xl max-w-lg w-full relative animate-fade-in">
-        
-        {/* Close Button */}
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
-          <X size={24} />
-        </button>
+  if (!isOpen) return null;
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Create a Group Session</h2>
-        
-        {success && (
-          <div className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-3 rounded-xl mb-6">
-            {success}
-          </div>
-        )}
-        {error && (
-          <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6">
-            {error}
-          </div>
-        )}
+  return (
+    <div className="bg-gray-50 rounded-2xl p-8 shadow-xl max-w-2xl mx-auto mt-8">
+      <div className="mb-6 flex items-center justify-between">
+        <h2 className="text-3xl font-bold text-gray-900">Create a Group Session</h2>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-md border px-3 py-1 text-sm text-gray-600 hover:bg-gray-100"
+        >
+          Close
+        </button>
+      </div>
+      
+      {success && (
+        <div className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-3 rounded-xl mb-6">
+          {success}
+        </div>
+      )}
+      {error && (
+        <div className="bg-red-50 border-2 border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6">
+          {error}
+        </div>
+      )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -120,7 +122,6 @@ if (!isOpen) return null
             {loading ? 'Scheduling...' : 'Schedule Group Class'}
           </button>
         </form>
-      </div>
     </div>
   );
 };
