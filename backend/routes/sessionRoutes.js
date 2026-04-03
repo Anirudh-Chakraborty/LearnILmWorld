@@ -45,7 +45,7 @@ router.post('/create-room', authenticate, authorize(['trainer']), async (req, re
     const hmsPayload = {
       name: `${title.replace(/\s+/g, '-')}-${uuidv4().substring(0, 8)}`,
       description: description || 'Live Session',
-      template_id: template_id, // Provide your 100ms template ID from frontend or .env
+      template_id: process.env.HMS_TEMPLATE_ID, // Provide your 100ms template ID from frontend or .env
       region: region || "in",
     };
     
@@ -224,8 +224,9 @@ router.post('/join-room', authenticate, async (req, res) => {
   if (!session_id) {
     return res.status(400).json({ success: false, msg: "session_id and role are required" });
   }
-
+  console.log("before try")
   try {
+    console.log('afete try')
     const session = await Session.findById(session_id);
     if (!session) {
       return res.status(404).json({ message: 'Session not found' })
@@ -277,6 +278,7 @@ router.post('/join-room', authenticate, async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
 
 //100ms Force end session (Trainer/Admin)
 router.post('/end-room/:id', authenticate, async (req, res) => {
