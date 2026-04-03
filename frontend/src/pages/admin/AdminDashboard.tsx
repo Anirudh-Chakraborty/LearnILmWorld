@@ -13,6 +13,7 @@ import AdminCourses from './AdminCourses'
 import AdminTrainers from './AdminTrainers'
 import AdminUsers from './AdminUsers'
 import AdminHome from '../AdminHome'
+import AdminStudents from './AdminStudents'
 
 // interface Certification {
 //   name: string
@@ -58,6 +59,7 @@ const AdminDashboard: React.FC = () => {
     { name: 'Home', href: '/admin', icon: Home },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Trainers', href: '/admin/trainers', icon: UserPlus },
+    { name: 'Students', href: '/admin/students', icon: UserPlus },
     { name: 'Sessions', href: '/admin/sessions', icon: Calendar },
     { name: 'Courses', href: '/admin/courses', icon: BookOpen },
     { name: 'Reviews', href: '/admin/reviews', icon: FilePlus },
@@ -127,6 +129,7 @@ const AdminDashboard: React.FC = () => {
             <Route path="/" element={<AdminHome />} />
             <Route path="/users" element={<AdminUsers />} />
             <Route path="/trainers" element={<AdminTrainers />} />
+            <Route path="/students" element={<AdminStudents />} />
             <Route path="/sessions" element={<AdminSessions />} />
             <Route path="/courses" element={<AdminCourses />} />
             <Route path="/reviews" element={<AdminReviews />} />

@@ -1,9 +1,10 @@
 import { useState } from "react";
-import logo from "../assets/newlogo.png";
+import logo from '../assets/newlogo2.png';
+
 import { Button, Nav, Offcanvas } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import CurrencySelector from "../components/CurrencySelector";
+import CurrencySelector from "./CurrencySelector";
 
 type NavbarProps = {
   variant?: "default" | "main";
@@ -15,24 +16,26 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const location = useLocation();
 
+  if (loading) return null;
+
+  // ✅ Role flags
+  const isLoggedIn = !!user;
+  const isAdmin = user?.role === "admin";
+  const isTrainer = user?.role === "trainer";
+
+  // ✅ Dashboard link fix
   const dashboardLink = user
     ? user.role === "trainer"
       ? "/trainer"
       : user.role === "admin"
-        ? "/admin"
-        : "/student"
+      ? "/admin"
+      : "/student"
     : "/login";
 
-  if (loading) return null;
-
-  const isAuthResolved = !loading;
-
   const handleScroll = (id: string) => {
-    // Check if we are currently on the about page
     if (location.pathname === "/about") {
       const element = document.getElementById(id);
       if (element) {
-        // Slight delay or immediate scroll
         element.scrollIntoView({ behavior: "smooth" });
       }
     }
@@ -40,15 +43,15 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
 
   return (
     <header className="sticky top-0 z-40">
-      <div className="flex w-full h-[75px] md:h-[85px] bg-white">
+      <div className="flex w-full h-[75px] md:h-[85px] bg-[#203989] text-white">
 
         {/* LEFT */}
-        <div className="w-fit flex items-center pl-2 md:pl-10">
+        <div className="w-fit flex items-center pl-1 md:pl-4 h-20">
           <Link to="/" className="h-full flex items-center">
             <img
               src={logo}
               alt="LearnILM World"
-              className="h-full w-auto object-contain"
+              className="h-8 md:h-10 w-auto object-contain"
             />
           </Link>
         </div>
@@ -59,62 +62,115 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
           {/* DESKTOP NAV */}
           <nav className="hidden lg:flex items-center gap-8">
 
-            {/* Currency selector ONLY for main variant */}
-            {variant === "main" && (
+            {/* {variant === "main" && (
               <CurrencySelector variant="header" />
-            )}
+            )} */}
 
-            <Link
-              to="/about#about"
-              onClick={() => handleScroll("about")}
-              className="relative text-lg font-medium text-[#203989] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-[#024AAC] after:transition-all after:duration-300 hover:after:w-full"
-            >
-              About
-            </Link>
+            {!isLoggedIn || isAdmin  ? (
+              <>
+                <Link
+                    to="/about#about"
+                    onClick={() => handleScroll("about")}
+                    className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                    >
+                    About
+                </Link>
+                <Link
+                    to="/careers"
+                    onClick={() => handleScroll("careers")}
+                    className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                    >
+                    Careers
+                </Link>
+                <Link to="/about#help"
+                    onClick={() => handleScroll("help")}
+                    className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                    >
+                    Help
+                </Link>
 
-            <Link
-              to="/careers"
-              onClick={() => handleScroll("careers")}
-              className="relative text-lg font-medium text-[#203989] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-[#024AAC] after:transition-all after:duration-300 hover:after:w-full"
-            >
-              Careers
-            </Link>
+                {isAdmin ? (
+                  <button
+                  onClick={() => {
+                    logout();
+                    navigate("/login");
+                  }}
+                  className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  Log Out
+                </button>
+                ) : (
+                <Link 
+                  to="/login"
+                  className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                  >
+                  Sign In
+                </Link>
+                )}
 
-            {user ? (
-              <div className="flex items-center gap-4">
+                {isAdmin ? (
+                  <Link to={dashboardLink} 
+                  className="px-6 py-2 rounded-full bg-white text-[#024AAC] text-sm font-bold shadow hover:scale-105 transition"
+                  >
+                  Dashboard
+                </Link>
+                ): (
+                <Link
+                  to="/register"
+                  className="px-6 py-2 rounded-full bg-white text-[#024AAC] text-base font-bold shadow hover:scale-105 transition"
+                >
+                  Get Started
+                </Link>
+                )}
+              </>
+            ) : (
+              <>
+                {isTrainer ? (<Link to="/trainer/sessions"
+                  onClick={() => handleScroll("sessions")}
+                  className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                  >
+                  My Sessions
+                </Link>
+                ) : (<Link to="/student/sessions"
+                  onClick={() => handleScroll("sessions")}
+                  className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                  >
+                  My Sessions
+                </Link>
+                )}
+
+                {isTrainer ? (
+                  <Link to="/trainer/students"
+                    onClick={() => handleScroll("students")}
+                    className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                    >
+                    My Students
+                  </Link>
+                ) : (
+                  <Link to="/main" 
+                    onClick={() => handleScroll("trainers")}
+                    className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                    >
+                    Find Trainers
+                  </Link>
+                )}
+
                 <button
                   onClick={() => {
                     logout();
                     navigate("/login");
                   }}
-                  className="relative text-lg font-medium text-[#203989] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-[#024AAC] after:transition-all after:duration-300 hover:after:w-full"
+                  className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
                 >
                   Log Out
                 </button>
 
-                <Link
-                  to={dashboardLink}
-                  className="px-6 py-2 rounded-full bg-[#024AAC] text-white text-sm font-bold shadow hover:scale-105 transition"
-                >
+                <Link to={dashboardLink} 
+                  className="px-6 py-2 rounded-full bg-white text-[#024AAC] text-sm font-bold shadow hover:scale-105 transition"
+                  >
                   Dashboard
                 </Link>
-              </div>
-            ) : (
-              <div className="flex items-center gap-6">
-                <Link
-                  to="/login"
-                  className="relative text-lg font-medium text-[#203989] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-[#024AAC] after:transition-all after:duration-300 hover:after:w-full"
-                >
-                  Sign In
-                </Link>
-
-                <Link
-                  to="/register"
-                  className="px-6 py-2 rounded-full bg-[#024AAC] text-white text-base font-bold shadow hover:scale-105 transition"
-                >
-                  Get Started
-                </Link>
-              </div>
+              </>
             )}
           </nav>
 
@@ -122,7 +178,7 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
           <div className="lg:hidden ml-auto flex items-center">
             <Button
               variant="link"
-              className="text-[#203989] text-4xl p-0 no-underline"
+              className="text-white text-4xl p-0 no-underline"
               onClick={() => setShowOffcanvas(true)}
             >
               ☰
@@ -139,44 +195,125 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
 
               <Offcanvas.Body>
                 <Nav className="flex-column gap-4">
-
                   {/*  Currency selector in mobile (main variant only) */}
-                  {variant === "main" && (
+                  {/* {variant === "main" && (
                     <CurrencySelector
                       variant="header"
                       onSelect={() => setShowOffcanvas(false)}
                     />
-                  )}
+                  )} */}
 
-                  <Nav.Link
-                    as={Link}
-                    to="/about#about"
-                    onClick={() => {
+                  {!isLoggedIn || isAdmin ? (
+                    <>
+                      <Nav.Link as={Link} to="/about#about"
+                      onClick={() => {
                       handleScroll("about");
                       setShowOffcanvas(false);
                     }}
-                  >
-                    About
-                  </Nav.Link>
-
-                  <Nav.Link
-                    as={Link}
-                    to="/careers"
-                    onClick={() => {
+                      >
+                        About
+                      </Nav.Link>
+                      <Nav.Link as={Link} 
+                      to="/careers"
+                      onClick={() => {
                       handleScroll("careers");
                       setShowOffcanvas(false);
-                    }}
-                  >
-                    Careers
-                  </Nav.Link>
-
-                  {user ? (
-                    <>
-                      <Nav.Link
-                        as={Link}
-                        to={dashboardLink}
-                        onClick={() => setShowOffcanvas(false)}
+                      }}
                       >
+                        Careers
+                      </Nav.Link>
+                      <Nav.Link as={Link} 
+                      to="/about#help"
+                      onClick={() => {
+                      handleScroll("help");
+                      setShowOffcanvas(false);
+                      }}
+                      >
+                        Help
+                      </Nav.Link>
+
+                      {isAdmin ? (
+                        <Nav.Link as={Link} to={dashboardLink}>
+                          Dashboard
+                        </Nav.Link>
+                      ) : (
+                        <Link
+                          to="/register"
+                          onClick={() => setShowOffcanvas(false)}
+                          className="w-full mt-2 block text-center px-4 py-2 rounded-full bg-[#276dc9] text-white font-bold no-underline"
+                        >
+                          Get Started
+                        </Link>
+                      )}
+
+                      {isAdmin ? (
+                        <button
+                        onClick={() => {
+                          logout();
+                          navigate("/login");
+                          setShowOffcanvas(false);
+                        }}
+                        className="w-full mt-2 px-4 py-2 rounded-full bg-[#276dc9] text-white font-bold"
+                        >
+                          Log Out
+                        </button>
+                      ) : (
+                        <Nav.Link as={Link} 
+                        to="/login"
+                        onClick={() => setShowOffcanvas(false)}
+                        >
+                          Sign In
+                        </Nav.Link>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {isTrainer ? (
+                        <Nav.Link as={Link} 
+                          to="/trainer/sessions"
+                          onClick={() => {
+                          handleScroll("sessions");
+                          setShowOffcanvas(false);
+                        }}
+                        >
+                        My Sessions
+                      </Nav.Link>
+                      ) : (
+                        <Nav.Link as={Link} 
+                          to="/student/sessions"
+                          onClick={() => {
+                          handleScroll("sessions");
+                          setShowOffcanvas(false);
+                        }}
+                        >
+                          My Sessions
+                      </Nav.Link>
+                      )}
+                      
+
+                      {isTrainer ? (
+                        <Nav.Link as={Link} 
+                        to="/trainer/students"
+                        onClick={() => {
+                          handleScroll("students");
+                          setShowOffcanvas(false);
+                        }}
+                        >
+                          My Students
+                        </Nav.Link>
+                      ) : (
+                        <Nav.Link as={Link} 
+                        to="/main"
+                        onClick={() => {
+                          handleScroll("trainers");
+                          setShowOffcanvas(false);
+                        }}
+                        >
+                          Find Trainers
+                        </Nav.Link>
+                      )}
+
+                      <Nav.Link as={Link} to={dashboardLink}>
                         Dashboard
                       </Nav.Link>
 
@@ -190,24 +327,6 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
                       >
                         Log Out
                       </button>
-                    </>
-                  ) : (
-                    <>
-                      <Nav.Link
-                        as={Link}
-                        to="/login"
-                        onClick={() => setShowOffcanvas(false)}
-                      >
-                        Sign In
-                      </Nav.Link>
-
-                      <Link
-                        to="/register"
-                        onClick={() => setShowOffcanvas(false)}
-                        className="w-full mt-2 block text-center px-4 py-2 rounded-full bg-[#276dc9] text-white font-bold no-underline"
-                      >
-                        Get Started
-                      </Link>
                     </>
                   )}
                 </Nav>

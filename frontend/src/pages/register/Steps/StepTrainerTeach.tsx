@@ -33,6 +33,7 @@ const SUBJECT_OPTIONS = [
 const LANGUAGE_OPTIONS = [
   { value: "English", label: "English" },
   { value: "Hindi", label: "Hindi" },
+  { value: "Sanskrit", label: "Sanskrit" },
   { value: "Bengali", label: "Bengali" },
   { value: "Marathi", label: "Marathi" },
   { value: "Urdu", label: "Urdu" },

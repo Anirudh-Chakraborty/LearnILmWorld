@@ -4,7 +4,11 @@ import { Link } from 'react-router-dom';
 import img1 from '../assets/ourteam1.jpeg'
 import img2 from '../assets/ourteam2.png'
 import img3 from '../assets/ourteam3.jpeg'
-import img4 from '../assets/ourteam4.jpeg'
+import img5 from '../assets/ourteam5.png'
+import img4 from '../assets/ourteam4.png'
+import img6 from '../assets/ourteam6.png'
+import img7 from '../assets/ourteam7.png'
+import img8 from '../assets/ourteam8.png'
 const teamMembers = [
   {
     id: 1,
@@ -24,18 +28,50 @@ const teamMembers = [
   },
   {
     id: 3,
-    name: "Abhinav",
+    name: "Deepika Chulaki",
+    role: "SALES HEAD",
+    bio: "Dedicated to perfecting the student journey, ensuring every tool we build makes learning more seamless and engaging.",
+    imageUrl: img5,
+    linkedin: "https://www.linkedin.com/in/deepika-chulaki-78459b31?utm_source=share_via&utm_content=profile&utm_medium=member_ios"
+  },
+  {
+    id: 4,
+    name: "Abhinav Dixit",
     role: "Advisor",
     bio: "Improves platform features to create a better student experience.",
     imageUrl: img3,
     linkedin: "https://www.linkedin.com/in/abhidixit13?utm_source=share_via&utm_content=profile&utm_medium=member_android"
   },
   {
-    id: 4,
-    name: "Team Members",
+    id: 5,
+    name: "Development Team",
     role: "BUILDING LearniLM🌍World",
     bio: "Dedicated to perfecting the student journey, ensuring every tool we build makes learning more seamless and engaging.",
     imageUrl: img4,
+    linkedin: ""
+  },
+  {
+    id: 6,
+    name: "Design Team",
+    role: "BUILDING LearniLM🌍World",
+    bio: "Dedicated to perfecting the student journey, ensuring every tool we build makes learning more seamless and engaging.",
+    imageUrl: img6,
+    linkedin: ""
+  },
+  {
+    id: 7,
+    name: "Engineering Team",
+    role: "BUILDING LearniLM🌍World",
+    bio: "Dedicated to perfecting the student journey, ensuring every tool we build makes learning more seamless and engaging.",
+    imageUrl: img7,
+    linkedin: ""
+  },
+  {
+    id: 8,
+    name: "HR Team",
+    role: "BUILDING LearniLM🌍World",
+    bio: "Dedicated to perfecting the student journey, ensuring every tool we build makes learning more seamless and engaging.",
+    imageUrl: img8,
     linkedin: ""
   },
 
@@ -64,7 +100,7 @@ const OurTeamMember = () => {
           src={member.imageUrl}
           alt={member.role}
           className={`w-full h-full ${
-            member.id === 4
+            member.id === 5 || member.id === 6 ||member.id === 7 ||member.id === 8
               ? "object-contain bg-white p-2"
               : "object-cover object-top"
           }`}
@@ -87,7 +123,7 @@ const OurTeamMember = () => {
     </div>
   );
 
-  return member.id === 4 ? (
+  return member.id === 5 || member.id === 6 || member.id === 7 || member.id === 8 ? (
     <div className="w-full max-w-[350px] cursor-not-allowed">{CardContent}</div>
   ) : (
     <Link

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Calendar, Clock, Trash2, Video, Edit3, Plus } from 'lucide-react'
+import { Clock, Video, PhoneOff, Users, Activity } from 'lucide-react'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 interface Trainer {
   _id: string
@@ -19,6 +20,7 @@ interface Booking {
   _id: string
   student: Student
   paymentStatus: string
+  bookingType?: string
 }
 
 interface Session {
@@ -32,56 +34,27 @@ interface Session {
   trainer?: Trainer
   students?: Student[]
   bookings?: Booking[]
-  jitsiLink?: string
+  roomId?: string
+  status?: string
   maxStudents?: number
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const AdminSessions: React.FC = () => {
+  const navigate = useNavigate()
   const [sessions, setSessions] = useState<Session[]>([])
-  const [trainers, setTrainers] = useState<Trainer[]>([])
-  const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [editingSession, setEditingSession] = useState<Session | null>(null)
-  const [showEditModal, setShowEditModal] = useState(false)
-
-  // -------------------- STATE --------------------
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    duration: 60,
-    maxStudents: 10,
-    language: '',
-    level: '',
-    scheduledDate: '',
-    trainerId: '',
-    bookingIds: [] as string[],
-  })
-
-  const [editFormData, setEditFormData] = useState({
-    title: '',
-    description: '',
-    duration: 60,
-    maxStudents: 10,
-    language: '',
-    level: '',
-    scheduledDate: '',
-    trainerId: '',
-    bookingIds: [] as string[],
-  })
-
 
   useEffect(() => {
     fetchSessions()
-    fetchTrainers()
   }, [])
 
   const token = localStorage.getItem('token')
   const axiosConfig = { headers: { Authorization: `Bearer ${token}` } }
 
-  // Fetch sessions
+  // Sirf sessions fetch karenge
   const fetchSessions = async () => {
     setLoading(true)
     try {
@@ -94,80 +67,30 @@ const AdminSessions: React.FC = () => {
     }
   }
 
-  // Fetch trainers
-  const fetchTrainers = async () => {
-    try {
-      const res = await axios.get(`${API_BASE_URL}/api/admin/trainers`, axiosConfig)
-      setTrainers(res.data || [])
-    } catch (err) {
-      console.error('Error fetching trainers:', err)
+  const handleJoinLiveSession = (session: Session) => {
+    if (!session.roomId) {
+      return alert("Room ID is missing for this active session.");
     }
+    navigate(`/session/${session._id}?roomId=${session.roomId}`);
   }
 
-  // Fetch bookings for selected trainer
-  const fetchBookingsByTrainer = async (trainerId: string) => {
-    try {
-      const res = await axios.get(`${API_BASE_URL}/api/admin/bookings/trainer/${trainerId}`, axiosConfig)
-      setBookings(res.data || [])
-    } catch (err) {
-      console.error('Error fetching bookings:', err)
-    }
-  }
+  const handleEndLiveSession = async (sessionId: string) => {
+    const confirmEnd = window.confirm("Are you sure you want to end this LIVE session for everyone?");
+    if (!confirmEnd) return;
 
-  // Handle Create Session
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault()
     try {
-      await axios.post(`${API_BASE_URL}/api/admin/sessions`, formData, axiosConfig)
-      alert('Session created successfully!')
-      setFormData({
-        title: '',
-        description: '',
-        duration: 60,
-        maxStudents: 10,
-        language: '',
-        level: '',
-        scheduledDate: '',
-        trainerId: '',
-        bookingIds: [],
-      })
-      fetchSessions()
+      await axios.post(
+        `${API_BASE_URL}/api/sessions/end-room/${sessionId}`,
+        {},
+        axiosConfig
+      );
+      alert("Session officially ended.");
+      fetchSessions();
     } catch (err: any) {
-      alert(err?.response?.data?.message || 'Failed to create session.')
+      console.error("Failed to end session:", err);
+      alert(err?.response?.data?.message || "Failed to end the session.");
     }
   }
-
-  // Handle Edit (modal)
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!editingSession) return
-    try {
-      await axios.put(`${API_BASE_URL}/api/admin/sessions/${editingSession._id}`, editFormData, axiosConfig)
-      alert('Session updated successfully!')
-      setEditingSession(null)
-      setShowEditModal(false)
-      fetchSessions()
-    } catch (err: any) {
-      alert(err?.response?.data?.message || 'Failed to update session.')
-    }
-  }
-
-  // Handle Delete
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this session?')) return
-    try {
-      await axios.delete(`${API_BASE_URL}/api/admin/sessions/${id}`, axiosConfig)
-      fetchSessions()
-    } catch (err) {
-      console.error(err)
-      alert('Failed to delete session')
-    }
-  }
-
-  // Fetch bookings when trainer changes
-  useEffect(() => {
-    if (formData.trainerId) fetchBookingsByTrainer(formData.trainerId)
-  }, [formData.trainerId])
 
   if (loading) {
     return (
@@ -181,320 +104,88 @@ const AdminSessions: React.FC = () => {
     return <div className="text-center text-red-600 mt-10">{error}</div>
   }
 
+  // Sirf Active sessions ko filter karenge
+  const activeSessions = sessions.filter(s => s.status === 'active');
+
   return (
     <div className="space-y-6 sm:space-y-10 max-w-[1200px] mx-auto w-full">
-      {/* CREATE FORM (Always visible) */}
-      <div className="glass-effect rounded-2xl p-4 sm:p-8 shadow-xl">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-          <Plus className="h-6 w-6 text-[#0ea5a3]" /> Create New Session
+      <div className="glass-effect rounded-2xl p-4 sm:p-8 shadow-xl border-2 border-red-100 bg-red-50/20">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+           <span className="w-4 h-4 rounded-full bg-red-600 animate-pulse border-2 border-white shadow-sm"></span>
+           Live Active Sessions
         </h2>
-
-        <form onSubmit={handleCreate} className="flex flex-col gap-4">
-          <input
-            type="text"
-            placeholder="Title"
-            className="w-full border p-2 rounded"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            required
-          />
-
-          <textarea
-            placeholder="Description"
-            className="w-full border p-2 rounded"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          />
-
-          {/* for mobile view */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <input
-              type="number"
-              placeholder="Duration (min)"
-              className="border p-2 rounded w-full"
-              value={formData.duration}
-              onChange={(e) => setFormData({ ...formData, duration: +e.target.value })}
-              required
-            />
-            <input
-              type="number"
-              placeholder="Max Students"
-              className="border p-2 rounded w-full"
-              value={formData.maxStudents}
-              onChange={(e) => setFormData({ ...formData, maxStudents: +e.target.value })}
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Language"
-              className="border p-2 rounded w-full"
-              value={formData.language}
-              onChange={(e) => setFormData({ ...formData, language: e.target.value })}
-            />
-            <select
-              className="border p-2 rounded w-full"
-              value={formData.level}
-              onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-              required
-            >
-              <option value="">Select Level</option>
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-            </select>
-          </div>
-
-          <input
-            type="datetime-local"
-            className="w-full border p-2 rounded"
-            value={formData.scheduledDate}
-            min={new Date().toISOString().slice(0, 16)} // prevents past dates
-            onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
-            required
-          />
-
-          <select
-            className="w-full border p-2 rounded"
-            value={formData.trainerId}
-            onChange={(e) => setFormData({ ...formData, trainerId: e.target.value, bookingIds: [] })}
-            required
-          >
-            <option value="">Select Trainer</option>
-            {trainers.map((trainer) => (
-              <option key={trainer._id} value={trainer._id}>
-                {trainer.name} ({trainer.email})
-              </option>
-            ))}
-          </select>
-
-          {bookings.length > 0 && (
-            <div>
-              <label className="block mb-1 text-sm font-medium text-gray-700">
-                Select Students (Completed Payments Only)
-              </label>
-              <div className="max-h-40 overflow-y-auto border p-2 rounded flex flex-col gap-2 bg-white">
-                {bookings.map((b) => (
-                  <label key={b._id} className="flex items-center gap-2 px-2 py-1 hover:bg-gray-50">
-                    <input
-                      type="checkbox"
-                      checked={formData.bookingIds.includes(b._id)}
-                      onChange={(e) => {
-                        const updated = e.target.checked
-                          ? [...formData.bookingIds, b._id]
-                          : formData.bookingIds.filter((id) => id !== b._id)
-                        setFormData({ ...formData, bookingIds: updated })
-                      }}
-                    />
-                    <span className='text-sm'>{b.student?.name} ({b.student?.email})</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            className="w-full sm:w-auto px-6 py-2 rounded-md bg-[#0ea5a3] text-white hover:bg-[#0d8b89] mt-4 sm:self-end font-medium"
-          >
-            Create Session
-          </button>
-        </form>
-      </div>
-
-      {/* ALL SESSIONS */}
-      <div className="glass-effect rounded-2xl p-4 sm:p-8 shadow-xl">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">All Sessions</h2>
-
-        {sessions.length === 0 ? (
-          <div className="text-center py-12">
-            <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No sessions found</h3>
-            <p className="text-gray-600 mb-6">No sessions have been scheduled yet</p>
+        
+        {activeSessions.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-red-100">
+            <Activity className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">No Active Sessions</h3>
+            <p className="text-gray-500">There are currently no live classes running right now.</p>
           </div>
         ) : (
-          <div className="space-y-6">
-            {sessions.map((session) => (
-              <div key={session._id} className="p-4 sm:p-6 bg-white/50 rounded-xl shadow border border-gray-100">
-                <div className="flex flex-col sm:flex-row justify-between items-start mb-4 gap-3">
-                  <div className="w-full">
-                    <h3 className="text-xl font-bold text-gray-900 break-words">{session.title}</h3>
-                    <p className="text-gray-600 text-sm mb-1">
-                      Trainer: <span className="font-medium">{session.trainer?.name || 'N/A'}</span> • {session.students?.length || 0} student(s)
-                    </p>
-                    <p className="text-gray-500 text-xs sm:text-sm">
-                      {new Date(session.scheduledDate).toLocaleString()}
-                    </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {activeSessions.map((session) => {
+              // Calculate Time Data
+              const startObj = new Date(session.scheduledDate);
+              const endObj = new Date(startObj.getTime() + (session.duration * 60000));
+              const formatTime = (d: Date) => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              
+              // Calculate Class Type
+              const isGroup = session.students && session.students.length > 1;
+              const classType = isGroup ? "Group Class" : "Private Class";
+              const classTagColor = isGroup ? "bg-purple-100 text-purple-700" : "bg-blue-100 text-blue-700";
+
+              return (
+                <div key={session._id} className="bg-white rounded-xl shadow-md border-l-4 border-red-500 p-5 flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start mb-3">
+                       <h3 className="text-xl font-bold text-gray-900">{session.title}</h3>
+                       <span className={`text-xs font-bold px-3 py-1 rounded-full ${classTagColor}`}>
+                         {classType}
+                       </span>
+                    </div>
+
+                    <div className="space-y-2 text-sm text-gray-700 mb-6">
+                      <p className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-gray-400" />
+                        <span className="font-semibold">{formatTime(startObj)} - {formatTime(endObj)}</span> 
+                        <span className="text-gray-500">({session.duration} mins)</span>
+                      </p>
+                      
+                      <p className="flex items-center gap-2">
+                        <Video className="w-4 h-4 text-gray-400" />
+                        <span className="font-semibold">Trainer:</span> {session.trainer?.name || 'Unknown'}
+                      </p>
+
+                      <p className="flex items-start gap-2">
+                        <Users className="w-4 h-4 text-gray-400 mt-1" />
+                        <span>
+                          <span className="font-semibold">Students:</span>{' '} 
+                          {session.students?.map(s => s.name).join(', ') || 'None'}
+                        </span>
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="flex gap-2 w-full sm:w-auto justify-start sm:justify-end">
-                    <button
-                      onClick={() => {
-                        setEditingSession(session)
-                        setEditFormData({
-                          title: session.title,
-                          description: session.description || '',
-                          duration: session.duration,
-                          maxStudents: session.maxStudents || 10,
-                          language: session.language || '',
-                          level: session.level || '',
-                          scheduledDate: session.scheduledDate.split('.')[0],
-                          trainerId: session.trainer?._id || '',
-                          bookingIds: session.bookings?.map((b) => b._id) || [],
-                        })
-                        setShowEditModal(true)
-                      }}
-                      className="flex-1 sm:flex-none p-2 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 flex justify-center items-center"
-                    >
-                      <Edit3 className="h-4 w-4" />
-                    </button>
-
-                    {session.jitsiLink && (
-                      <a
-                        href={session.jitsiLink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex-1 sm:flex-none p-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 flex items-center justify-center"
-                      >
-                        <Video className="h-4 w-4" />
-                      </a>
-                    )}
-
-                    <button
-                      onClick={() => handleDelete(session._id)}
-                      className="flex-1 sm:flex-none p-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 flex justify-center items-center"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {session.description && (
-                  <p className="text-gray-700 mb-3 text-sm">{session.description}</p>
-                )}
-
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm text-gray-500 gap-2 border-t pt-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Clock className="h-4 w-4" /> <span>{session.duration} min</span>
-                    {session.language && <span>• {session.language}</span>}
-                    {session.level && <span>• {session.level}</span>}
-                    {session.maxStudents && <span>• Max: {session.maxStudents}</span>}
-                  </div>
-                  <div className="truncate">
-                    Jitsi Room: <span className="font-mono bg-gray-100 px-1 rounded">{session.jitsiLink ? session.jitsiLink.split('/').pop() : 'N/A'}</span>
+                  <div className="flex gap-3 mt-auto">
+                     <button 
+                       onClick={() => handleJoinLiveSession(session)}
+                       className="flex-1 bg-[#0ea5a3] hover:bg-[#0c8a88] text-white py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition"
+                     >
+                       <Video size={18} /> Join as Admin
+                     </button>
+                     <button 
+                       onClick={() => handleEndLiveSession(session._id)}
+                       className="flex-1 bg-red-100 hover:bg-red-200 text-red-700 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition"
+                     >
+                       <PhoneOff size={18} /> End Meeting
+                     </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
-
-      {/* EDIT MODAL */}
-      {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-8">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-[600px] mx-auto">
-            <h3 className="text-2xl font-semibold mb-4">Edit Session</h3>
-            <form onSubmit={handleUpdate} className="flex flex-col gap-4">
-              <input
-                type="text"
-                placeholder="Title"
-                className="w-full border p-2 rounded"
-                value={editFormData.title}
-                onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                required
-              />
-              <textarea
-                placeholder="Description"
-                className="w-full border p-2 rounded"
-                value={editFormData.description}
-                onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-              />
-              <div className="flex gap-4">
-                <input
-                  type="number"
-                  placeholder="Duration (min)"
-                  className="border p-2 rounded w-1/2"
-                  value={editFormData.duration}
-                  onChange={(e) => setEditFormData({ ...editFormData, duration: +e.target.value })}
-                />
-                <input
-                  type="number"
-                  placeholder="Max Students"
-                  className="border p-2 rounded w-1/2"
-                  value={editFormData.maxStudents}
-                  onChange={(e) => setEditFormData({ ...editFormData, maxStudents: +e.target.value })}
-                />
-              </div>
-
-
-              <div className="flex gap-4">
-                <input
-                  type="text"
-                  placeholder="Language"
-                  className="border p-2 rounded w-1/2"
-                  value={editFormData.language}
-                  onChange={(e) => setEditFormData({ ...editFormData, language: e.target.value })}
-                />
-                <select
-                  className="border p-2 rounded w-1/2"
-                  value={editFormData.level}
-                  onChange={(e) => setEditFormData({ ...editFormData, level: e.target.value })}
-                >
-                  <option value="">Select Level</option>
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="advanced">Advanced</option>
-                </select>
-              </div>
-
-              <input
-                type="datetime-local"
-                className="w-full border p-2 rounded"
-                value={editFormData.scheduledDate}
-                onChange={(e) => setEditFormData({ ...editFormData, scheduledDate: e.target.value })}
-                required
-              />
-
-              <select
-                className="w-full border p-2 rounded"
-                value={editFormData.trainerId}
-                onChange={(e) => setEditFormData({ ...editFormData, trainerId: e.target.value })}
-                required
-              >
-                <option value="">Select Trainer</option>
-                {trainers.map((trainer) => (
-                  <option key={trainer._id} value={trainer._id}>
-                    {trainer.name} ({trainer.email})
-                  </option>
-                ))}
-              </select>
-
-
-              <div className="flex justify-end gap-2 mt-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingSession(null)
-                    setShowEditModal(false)
-                  }}
-                  className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#0ea5a3] text-white rounded-md hover:bg-[#0d8b89]"
-                >
-                  Update
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

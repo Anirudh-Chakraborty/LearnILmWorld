@@ -71,8 +71,8 @@ export default function AboutPage() {
     },
     {
       icon: Calendar,
-      title: "Payment Policy", // Title matches the photo (likely meant to be 'Cancellations')
-      text: "Learners can cancel or reschedule sessions from their dashboard ass per the platform's cancellation policy. late cancellations may not qualify for refund",
+      title: "Cancellation & Scheduling", 
+      text: "Learners can cancel or reschedule sessions from their dashboard as per the platform's cancellation policy. Late cancellations may not qualify for refund",
     },
     {
       icon: UserX,
@@ -82,12 +82,12 @@ export default function AboutPage() {
     {
       icon: XCircle,
       title: "Non- Refundable Cases",
-      text: "Refund are not applicable for completed sessions, partial attendance, or misuse of the platform. Any suspicious activity may lead to account review.",
+      text: "Refund is not applicable for completed sessions, partial attendance or misuse of the platform. Any suspicious activity may lead to account review.",
     },
     {
       icon: LifeBuoy,
       title: "Support & Resolution",
-      text: "If you face any issues related to payment's or refunds, out support team is here to help and resolve refund-related queries with in a reasonable timeframe.",
+      text: "If you face any issues related to payments or refunds, our support team is here to help and resolve refund-related queries within a reasonable timeframe.",
     },
   ];
 
@@ -286,7 +286,6 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <OurTeamMember />
 
         {/* e0fa84 bg-gradient-to-b from-[#2D274B] to-[#1E1A3A] */}
         {/* OUR VISION & VALUES */}
@@ -641,6 +640,8 @@ export default function AboutPage() {
           </p>
         </div>
       </section>
+      
+        <OurTeamMember />
 
       {/* HELP CENTRE */}
       {/* bg-[#2D274B] e0fa84 */}

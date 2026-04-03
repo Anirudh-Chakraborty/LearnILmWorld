@@ -64,16 +64,16 @@ const AdminTrainers: React.FC = () => {
                                         <td className="py-3 px-4 font-medium text-gray-900 whitespace-nowrap">{t.name}</td>
                                         <td className="py-3 px-4 text-gray-700 whitespace-nowrap">{t.email}</td>
                                         <td className="py-3 px-4 text-center text-gray-700 whitespace-nowrap">
-                                            {t.dashboardStats?.totalSessions || 0}
+                                            {t.stats?.totalSessions || 0}
                                         </td>
                                         <td className="py-3 px-4 text-center text-gray-700 whitespace-nowrap">
-                                            {t.dashboardStats?.completedSessions || 0}
+                                            {t.stats?.completedSessions || 0}
                                         </td>
                                         <td className="py-3 px-4 text-center text-gray-700 whitespace-nowrap">
                                             {t.dashboardStats?.totalStudents || 0}
                                         </td>
                                         <td className="py-3 px-4 text-center text-gray-700 font-semibold whitespace-nowrap">
-                                            ${t.dashboardStats?.totalEarnings?.toFixed(2) || '0.00'}
+                                            ${t.stats?.totalEarnings?.toFixed(2) || '0.00'}
                                         </td>
                                         <td className="py-3 px-4 text-center text-gray-700 font-semibold whitespace-nowrap">
                     ${t.dashboardStats?.monthlyEarnings?.toFixed(2) || '0.00'}
