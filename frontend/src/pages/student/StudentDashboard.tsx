@@ -67,7 +67,7 @@ const StudentDashboard: React.FC = () => {
 
       {/* ================= SIDEBAR ================= */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#1a56ad] p-6
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#203989] p-6
         transform transition-transform duration-300 flex flex-col no-scrollbar shadow-xl
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       >

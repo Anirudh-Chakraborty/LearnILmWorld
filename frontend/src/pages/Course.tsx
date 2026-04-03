@@ -401,7 +401,7 @@ import { motion } from 'framer-motion';
 
 const Courses = () => {
   return (
-    <div className="min-h-screen flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col ">
       <Navbar />
       
       {/* --- TOP SECTION --- */}

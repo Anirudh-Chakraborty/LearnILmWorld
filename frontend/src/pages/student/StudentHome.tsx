@@ -122,7 +122,7 @@ const StudentHome: React.FC = () => {
         <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
           <p className="text-sm text-gray-500">Avg Progress</p>
           <p className="text-3xl font-semibold text-gray-900 mt-2">
-            {stats.avgProgress}%
+            {((user?.stats?.completedSessions / user?.stats?.totalSessions) * 100 || 0).toFixed(2)}%
           </p>
           <p className="text-xs text-blue-500 font-medium mt-1">
             Learning progress

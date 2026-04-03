@@ -3,6 +3,13 @@ import { useState, useEffect, ChangeEvent } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import ReactFlagsSelect from "react-flags-select";
 import axios from "axios";
+
+import SecurityTab from '../student/SecurityTab';
+
+import TrainerTabs from "./components/NavBarForTrainerProfile";
+import { Instagram, Youtube, Linkedin, Video } from "lucide-react";
+
+
 //  commented out trainers hourly rate
 
 // const FRONTEND_URL= import.meta.env.VITE_FRONTEND_URL;
@@ -593,81 +600,169 @@ const TrainerProfile = () => {
     }
   }
 
+  const [activeTab, setActiveTab] = useState("basic");
+  const [showPhotoEditor, setShowPhotoEditor] = useState(false);
+  
+
   return (
     <div className="space-y-8">
-      <div className="bg-gray-50 rounded-2xl p-8 shadow-xl">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-900">My Profile</h2>
-        </div>
+        <div className="bg-white rounded-xl border p-6 shadow-sm">
+      
+          {/* Top Section */}
+          <div className="flex items-center gap-4">
 
-        {/* Image: preview + URL + file upload */}
-        <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">
-            Profile image
-          </label>
+            {/* Profile Image */}
+            <div className="relative w-20 h-20">
+              <div className="w-20 h-20 rounded-full overflow-hidden border">
+                {previewLink ? (
+                  <img
+                    src={previewLink}
+                    alt="Profile preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">
+                    No image
+                  </div>
+                )}
+              </div>
 
-          <div className="flex items-start gap-4">
-            <div className="w-28 h-28 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border">
-              {previewLink ? (
-                <img
-                  src={previewLink}
-                  alt="Profile preview"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="text-xs text-slate-500 px-2 text-center">
-                  No image
-                </div>
-              )}
+              {/* Camera Icon */}
+              <button
+                type="button"
+                onClick={() => setShowPhotoEditor(!showPhotoEditor)}
+                className="absolute bottom-0 right-0 w-7 h-7 flex items-center justify-center 
+                          bg-gray-100 hover:bg-gray-200 border border-white 
+                          rounded-full shadow-sm transition"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-4 h-4 text-gray-600"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M9 3L7.17 5H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V7a2 2 0 00-2-2h-3.17L15 3H9zm3 14a4 4 0 110-8 4 4 0 010 8z" />
+                </svg>
+              </button>
             </div>
 
-            <div className="flex-1 space-y-2">
+            {/* User Info */}
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {formData.name || "Your Name"}
+              </h3>
+
+              
+              <div className="flex gap-2 mt-1">
+                {formData.profile.languages.length > 0 && (
+                <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                  {formData.profile.languages}
+                </span>
+                )}
+
+                {formData.profile.specializations.length > 0 && (
+                <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded">
+                  {formData.profile.specializations}
+                </span>
+                )}
+              </div>
+
+
+              <div className="text-xs text-gray-500 mt-1 flex items-center gap-1 flex-wrap">
+                <span>
+                  <span className="font-semibold text-gray-800">
+                    {formData.profile.experience}
+                  </span>{" "}
+                  years of experience
+                </span>
+
+                <span>•</span>
+
+                {/* Location with Icon */}
+                <span className="flex items-center gap-1">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-3 h-3 text-gray-500"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z" />
+                  </svg>
+                  {formData.profile.location}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 🔥 Photo Editor Panel (Appears on Click) */}
+          {showPhotoEditor && (
+            <div className="mt-6 flex items-center gap-4 bg-gray-50 p-4 rounded-xl border">
+
+              {/* Small Preview */}
+              <div className="w-14 h-14 rounded-full overflow-hidden border">
+                {previewLink ? (
+                  <img
+                    src={previewLink}
+                    alt="preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    👤
+                  </div>
+                )}
+              </div>
+
+              {/* Input */}
               <input
                 type="url"
-                id="profile.imageUrl"
                 name="profile.imageUrl"
                 value={formData.profile.imageUrl}
                 onChange={(e) => {
                   handleChange(e);
                   setSelectedImageFile(null);
                 }}
-                placeholder="Paste image URL (or upload below)"
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0ea5a3] focus:border-[#0ea5a3] transition-all duration-300 font-medium"
+                placeholder="Enter Image URL"
+                className="flex-1 px-4 py-2 border rounded-lg"
               />
 
-              <div className="flex gap-2 items-center">
-                <label className="cursor-pointer inline-block">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                  <span className="px-4 py-2 rounded-lg bg-gray-100 border font-medium text-sm hover:bg-gray-200">
-                    Upload image
-                  </span>
-                </label>
+              {/* Upload Button */}
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <span className="px-4 py-2 bg-gray-200 rounded-lg text-sm">
+                  Update Photo
+                </span>
+              </label>
 
-                {formData.profile.imageUrl && (
-                  <button
-                    type="button"
-                    onClick={handleRemoveImage}
-                    className="px-4 py-2 rounded-lg bg-red-50 border text-red-600 text-sm hover:bg-red-100"
-                  >
-                    Remove
-                  </button>
-                )}
-              </div>
+              {/* Remove */}
+              <button
+                type="button"
+                onClick={handleRemoveImage}
+                className="px-4 py-2 bg-red-100 text-red-600 rounded-lg text-sm"
+              >
+                Remove
+              </button>
 
-              <div className="text-xs text-slate-500">
-                Tip: Paste an image URL or upload a file. Upload uses a local
-                base64 preview — to persist, your updateProfile should accept
-                image data or you should upload to storage and save resulting
-                URL.
-              </div>
+              {/* Done */}
+              <button
+                type="button"
+                onClick={() => setShowPhotoEditor(false)}
+                className="text-blue-600 text-sm underline"
+              >
+                Done
+              </button>
             </div>
-          </div>
+          )}
+
+          
         </div>
+        
+        <TrainerTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {success && (
           <div className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-3 rounded-xl mb-6">
@@ -680,682 +775,725 @@ const TrainerProfile = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Basic Information */}
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              Basic Information
-            </h3>
-            <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-xl border p-6 shadow-sm">
+
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Basic Information */}
+        
+            {activeTab === "basic" && (
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Full Name
-                </label>
-                <input
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="input-field"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  className="input-field bg-gray-50"
-                  disabled
-                />
-              </div>
-              {/* secondary email Removed now */}
-              {/* <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Secondary Email</label>
-                <input
-                  type="email"
-                  name="secondaryEmail"
-                  value={formData.secondaryEmail}
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder="Enter secondary email"
-                />
-              </div> */}
-
-              {/* Phone Number */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <input
-                  name="profile.phone"
-                  value={formData.profile.phone}
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder="+1 (555) 123-4567"
-                />
-              </div>
-              {/* Nationality */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Nationality
-                </label>
-
-                <ReactFlagsSelect
-                  selected={formData.profile.nationalityCode}
-                  onSelect={(code) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      profile: { ...prev.profile, nationalityCode: code },
-                    }))
-                  }
-                  searchable
-                  className="w-full"
-                  selectButtonClassName="input-field flex items-center justify-between"
-                  placeholder="Select Nationality"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Location
-                </label>
-                <input
-                  name="profile.location"
-                  value={formData.profile.location}
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder="City, Country"
-                />
-              </div>
-            </div>
-
-            {/* timezone */}
-            <div className="mt-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Timezone
-                </label>
-                <select
-                  name="profile.timezone"
-                  value={formData.profile.timezone}
-                  onChange={handleChange}
-                  className="input-field"
-                >
-                  {/* Intl.supportedValuesOf browser ka in-built function hai jo saare timezones ki list de deta hai */}
-                  {(Intl as any).supportedValuesOf('timeZone').map((tz: string) => (
-                    <option key={tz} value={tz}>
-                      {tz}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-            {/* bio */}
-            <div className="mt-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Bio
-              </label>
-              <textarea
-                name="profile.bio"
-                value={formData.profile.bio}
-                onChange={handleChange}
-                className="input-field"
-                rows={4}
-                placeholder="Tell students about yourself..."
-              />
-            </div>
-          </div>
-
-          {/* Teaching Info */}
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              Teaching Information
-            </h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Years of Experience
-                </label>
-                <input
-                  type="number"
-                  name="profile.experience"
-                  value={formData.profile.experience}
-                  onChange={handleChange}
-                  className="input-field"
-                  min={0}
-                  step={0.5}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Teaching Style
-                </label>
-                <select
-                  name="profile.teachingStyle"
-                  value={formData.profile.teachingStyle}
-                  onChange={handleChange}
-                  className="input-field"
-                >
-                  <option>Conversational</option>
-                  <option>Grammar-focused</option>
-                  <option>Immersive</option>
-                  <option>Business-oriented</option>
-                  <option>Exam Preparation</option>
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Is Available for New Bookings
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    name="profile.isAvailable"
-                    checked={!!formData.profile.isAvailable}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        profile: {
-                          ...prev.profile,
-                          isAvailable: e.target.checked,
-                        },
-                      }))
-                    }
-                  />
-                  <span>Yes</span>
-                </label>
-              </div>
-            </div>
-
-
-
-            {/* Languages */}
-            <div className="mt-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Languages
-              </label>
-              <ul className="space-y-2 mb-4">
-                {(formData.profile.languages || []).map((lang, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-center justify-between bg-gray-100 p-2 rounded"
-                  >
-                    {lang}
-                    <button
-                      type="button"
-                      onClick={() => removeFromArray("languages", idx)}
-                      className="text-red-600"
-                    >
-                      Remove
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex">
-                <input
-                  type="text"
-                  value={newLanguage}
-                  onChange={(e) => setNewLanguage(e.target.value)}
-                  className="input-field flex-1 mr-2"
-                  placeholder="Add new language"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    addToArray("languages", newLanguage);
-                    setNewLanguage("");
-                  }}
-                  className="btn-primary"
-                >
-                  Add
-                </button>
-              </div>
-            </div>
-
-            {/* Hobbies */}
-            <div className="mt-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Hobbies
-              </label>
-              <ul className="space-y-2 mb-4">
-                {(formData.profile.hobbies || []).map((hobby, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-center justify-between bg-gray-100 p-2 rounded"
-                  >
-                    {hobby}
-                    <button
-                      type="button"
-                      onClick={() => removeFromArray("hobbies", idx)}
-                      className="text-red-600"
-                    >
-                      Remove
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex">
-                <input
-                  type="text"
-                  value={newHobby}
-                  onChange={(e) => setNewHobby(e.target.value)}
-                  className="input-field flex-1 mr-2"
-                  placeholder="Add new hobby"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    addToArray("hobbies", newHobby);
-                    setNewHobby("");
-                  }}
-                  className="btn-primary"
-                >
-                  Add
-                </button>
-              </div>
-            </div>
-
-            {/* Specializations / Subjects */}
-            <div className="mt-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Specializations
-              </label>
-              <ul className="space-y-2 mb-4">
-                {(formData.profile.specializations || []).map((spec, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-center justify-between bg-gray-100 p-2 rounded"
-                  >
-                    {spec}
-                    <button
-                      type="button"
-                      onClick={() => removeFromArray("specializations", idx)}
-                      className="text-red-600"
-                    >
-                      Remove
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex">
-                <input
-                  type="text"
-                  value={newSpecialization}
-                  onChange={(e) => setNewSpecialization(e.target.value)}
-                  className="input-field flex-1 mr-2"
-                  placeholder="Add new specialization"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    addToArray("specializations", newSpecialization);
-                    setNewSpecialization("");
-                  }}
-                  className="btn-primary"
-                >
-                  Add
-                </button>
-              </div>
-            </div>
-
-            {/* Standards */}
-            <div className="mt-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Standards (e.g., 5-8, 5-10, etc.)
-              </label>
-
-              <ul className="space-y-2 mb-4">
-                {(formData.profile.standards || []).map((std, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-center justify-between bg-gray-100 p-2 rounded"
-                  >
-                    {std}
-                    <button
-                      type="button"
-                      onClick={() => removeFromArray("standards", idx)}
-                      className="text-red-600"
-                    >
-                      Remove
-                    </button>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="flex">
-                <input
-                  type="text"
-                  value={newStandard}
-                  onChange={(e) => setNewStandard(e.target.value)}
-                  className="input-field flex-1 mr-2"
-                  placeholder="Add new standard (e.g., 5-8)"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    addToArray("standards", newStandard);
-                    setNewStandard("");
-                  }}
-                  className="btn-primary"
-                >
-                  Add
-                </button>
-              </div>
-            </div>
-
-            {/* Trainer Languages (complex) */}
-            <div className="mt-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Trainer Languages
-              </label>
-              {(formData.profile.trainerLanguages || []).map((tl, idx) => (
-                <div
-                  key={idx}
-                  className="bg-gray-100 p-4 rounded mb-4 space-y-2"
-                >
-                  <input
-                    type="text"
-                    value={tl.language || ""}
-                    onChange={(e) =>
-                      updateObjectInArray(
-                        "trainerLanguages",
-                        idx,
-                        "language",
-                        e.target.value,
-                      )
-                    }
-                    className="input-field"
-                    placeholder="Language"
-                  />
-                  <select
-                    value={tl.proficiency || "Fluent"}
-                    onChange={(e) =>
-                      updateObjectInArray(
-                        "trainerLanguages",
-                        idx,
-                        "proficiency",
-                        e.target.value,
-                      )
-                    }
-                    className="input-field"
-                  >
-                    <option value="Native">Native</option>
-                    <option value="Fluent">Fluent</option>
-                  </select>
-                  <input
-                    type="text"
-                    value={(tl.teachingLevel || []).join(", ")}
-                    onChange={(e) =>
-                      updateTrainerLangLevels(idx, e.target.value)
-                    }
-                    className="input-field"
-                    placeholder="Teaching Levels (comma-separated)"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeFromArray("trainerLanguages", idx)}
-                    className="text-red-600"
-                  >
-                    Remove
-                  </button>
+                
+                {/* Header */}
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Basic Information
+                  </h3>
                 </div>
-              ))}
-              <button
-                type="button"
-                onClick={() =>
-                  addComplexToArray("trainerLanguages", {
-                    language: "",
-                    proficiency: "Fluent",
-                    teachingLevel: [],
-                  })
-                }
-                className="btn-primary"
-              >
-                Add Trainer Language
-              </button>
-            </div>
 
-            {/* Certifications */}
-            <div className="mt-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Certifications
-              </label>
-              {(formData.profile.certifications || []).map(
-                (cert: any, idx: number) => (
-                  <div
-                    key={idx}
-                    className="bg-gray-100 p-4 rounded mb-4 space-y-2"
+                {/* Form Grid */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  
+                  {/* Full Name */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-gray-700">
+                      Full Names
+                    </label>
+                    <input
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="input-field focus:ring-2 focus:ring-blue-500 transition"
+                      required
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-gray-700">
+                      Email Address
+                    </label>
+                    <input
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      className="input-field bg-gray-100 cursor-not-allowed"
+                      disabled
+                    />
+                  </div>
+
+                  {/* Phone */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-gray-700">
+                      Phone Number
+                    </label>
+                    <input
+                      name="profile.phone"
+                      value={formData.profile.phone}
+                      onChange={handleChange}
+                      className="input-field focus:ring-2 focus:ring-blue-500 transition"
+                      placeholder="+1 (555) 123-4567"
+                    />
+                  </div>
+
+                  {/* Nationality */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-gray-700">
+                      Nationality
+                    </label>
+
+                    <ReactFlagsSelect
+                      selected={formData.profile.nationalityCode}
+                      onSelect={(code) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          profile: { ...prev.profile, nationalityCode: code },
+                        }))
+                      }
+                      searchable
+                      className="w-full"
+                      selectButtonClassName="input-field flex items-center justify-between"
+                      placeholder="Select Nationality"
+                    />
+                  </div>
+
+                  {/* Location */}
+                  <div className="flex flex-col gap-1 md:col-span-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      Location
+                    </label>
+                    <input
+                      name="profile.location"
+                      value={formData.profile.location}
+                      onChange={handleChange}
+                      className="input-field focus:ring-2 focus:ring-blue-500 transition"
+                      placeholder="City, Country"
+                    />
+                  </div>
+                </div>
+
+                {/* Timezone */}
+                <div className="mt-6">
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Timezone
+                  </label>
+                  <select
+                    name="profile.timezone"
+                    value={formData.profile.timezone}
+                    onChange={handleChange}
+                    className="input-field focus:ring-2 focus:ring-blue-500 transition"
                   >
-                    {certFields.map((f) => (
+                    {(Intl as any)
+                      .supportedValuesOf("timeZone")
+                      .map((tz: string) => (
+                        <option key={tz} value={tz}>
+                          {tz}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* Bio */}
+                <div className="mt-6">
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    Bio
+                  </label>
+                  <textarea
+                    name="profile.bio"
+                    value={formData.profile.bio}
+                    onChange={handleChange}
+                    className="input-field focus:ring-2 focus:ring-blue-500 transition"
+                    rows={4}
+                    placeholder="Tell students about yourself..."
+                  />
+                </div>
+
+              </div>
+            )}
+
+
+            {/* Teaching Info */}
+            {activeTab === "teaching" && (
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">
+                  Teaching Information
+                </h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Years of Experience
+                    </label>
+                    <input
+                      type="number"
+                      name="profile.experience"
+                      value={formData.profile.experience}
+                      onChange={handleChange}
+                      className="input-field"
+                      min={0}
+                      step={0.5}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Teaching Style
+                    </label>
+                    <select
+                      name="profile.teachingStyle"
+                      value={formData.profile.teachingStyle}
+                      onChange={handleChange}
+                      className="input-field"
+                    >
+                      <option>Conversational</option>
+                      <option>Grammar-focused</option>
+                      <option>Immersive</option>
+                      <option>Business-oriented</option>
+                      <option>Exam Preparation</option>
+                    </select>
+                  </div>
+
+                  {/*<div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Is Available for New Bookings
+                    </label>
+                    <label className="flex items-center gap-2">
                       <input
-                        key={f.key}
-                        type={f.type}
-                        value={cert[f.key] ?? ""}
-                        placeholder={f.placeholder}
-                        min={f.min}
-                        max={f.max}
-                        onChange={(e) => {
-                          const val =
-                            f.type === "number"
-                              ? parseInt(e.target.value, 10) || null
-                              : e.target.value;
-                          updateObjectInArray(
-                            "certifications",
-                            idx,
-                            f.key,
-                            val,
-                          );
-                        }}
-                        className="input-field"
+                        type="checkbox"
+                        name="profile.isAvailable"
+                        checked={!!formData.profile.isAvailable}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            profile: {
+                              ...prev.profile,
+                              isAvailable: e.target.checked,
+                            },
+                          }))
+                        }
                       />
+                      <span>Yes</span>
+                    </label>
+                  </div> */}
+                </div>
+
+                {/* Languages */}
+                {formData.profile.languages.length !== 0 && (
+                  <div className="mt-6">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Languages
+                    </label>
+
+                    <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50">
+                      {(formData.profile.languages || []).map((lang, idx) => (
+                        <span
+                          key={idx}
+                          className="flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
+                        >
+                          {lang}
+                          
+                        </span>
+                      ))}
+
+                      
+                      
+                    </div>
+                  </div>
+                )}
+
+                {/* Hobbies */}
+                {formData.profile.hobbies.length !== 0 && (
+                <div className="mt-6">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Hobbies
+                  </label>
+
+                  <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50">
+                    {(formData.profile.hobbies || []).map((hobby, idx) => (
+                      <span
+                        key={idx}
+                        className="flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
+                      >
+                        {hobby}
+                      </span>
+                    ))}
+                    
+                  </div>
+                </div>
+                )}
+
+                {/* Specializations / Subjects */}
+                {formData.profile.specializations.length !== 0 && (
+                <div className="mt-6">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Specializations
+                  </label>
+
+                  <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50">
+                    {(formData.profile.specializations || []).map((spec, idx) => (
+                      <span
+                        key={idx}
+                        className="flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
+                      >
+                        {spec}
+                        
+                      </span>
                     ))}
 
-                    {/* Certificate Image */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Certificate Image
-                      </label>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-
-                          updateObjectInArray(
-                            "certifications",
-                            idx,
-                            "certificateImage",
-                            file
-                          );
-                        }}
-                        className="input-field"
-                      />
-                      {cert.certificateImage && (
-                        <img
-                          src={
-                            cert.certificateImage instanceof File
-                              ? URL.createObjectURL(cert.certificateImage)
-                              : certPreviews[idx]
-                          }
-                          alt="Cert"
-                          className="w-32 h-32 mt-2 object-cover rounded border"
-                        />
-                      )}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => removeFromArray("certifications", idx)}
-                      className="text-red-600"
-                    >
-                      Remove
-                    </button>
+                    
                   </div>
-                ),
-              )}
+                </div>
+                )}
 
-              <button
-                type="button"
-                onClick={() =>
-                  addComplexToArray("certifications", {
-                    name: "",
-                    issuer: "",
-                    year: null,
-                    certificateImage: "",
-                    certificateLink: "",
-                  })
-                }
-                className="btn-primary"
-              >
-                Add Certification
-              </button>
-            </div>
+                {/* Standards */}
+                {formData.profile.standards.length !== 0 && (
+                <div className="mt-6">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Standards / Grades Taught
+                  </label>
+
+                  <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50">
+                    {(formData.profile.standards || []).map((std, idx) => (
+                      <span
+                        key={idx}
+                        className="flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
+                      >
+                        {std}
+                        
+                      </span>
+                    ))}
+
+                    
+                  </div>
+                </div>
+                )}
+
+                
+              </div>
+            )}
+
 
             {/* Availability */}
-            <div className="mt-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Availability
-              </label>
-              {(formData.profile.availability || []).map((av, idx) => (
-                <div
-                  key={String(av.day || idx)}
-                  className="bg-gray-100 p-4 rounded mb-4 space-y-2"
-                >
-                  <div className="font-medium capitalize">{av.day}</div>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={!!av.available}
-                      onChange={(e) =>
-                        updateAvailability(idx, "available", e.target.checked)
-                      }
-                      className="mr-2"
-                    />{" "}
-                    Available
-                  </label>
-                  {av.available && (
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="time"
-                        value={av.startTime || ""}
-                        onChange={(e) =>
-                          updateAvailability(idx, "startTime", e.target.value)
-                        }
-                        className="input-field"
-                      />
-                      <span>to</span>
-                      <input
-                        type="time"
-                        value={av.endTime || ""}
-                        onChange={(e) =>
-                          updateAvailability(idx, "endTime", e.target.value)
-                        }
-                        className="input-field"
-                      />
+            {activeTab === "availability" && (
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-1">
+                  Weekly Availability
+                </h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  Set your availability for each day of the week
+                </p>
+
+                <div className="space-y-4">
+                  {(formData.profile.availability || []).map((av, idx) => (
+                    <div
+                      key={String(av.day || idx)}
+                      className="flex items-center justify-between bg-gray-100 px-4 py-3 rounded-xl"
+                    >
+                      {/* Left Section (Day + Toggle) */}
+                      <div className="flex items-center gap-4 w-1/3">
+                        <span className="font-medium text-gray-700 capitalize w-24">
+                          {av.day}
+                        </span>
+
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={!!av.available}
+                            onChange={(e) =>
+                              updateAvailability(idx, "available", e.target.checked)
+                            }
+                            className="sr-only peer"
+                          />
+
+                          {/* Toggle Switch */}
+                          <div className="w-10 h-5 bg-gray-300 rounded-full peer peer-checked:bg-blue-500 transition-all"></div>
+                          <div className="absolute left-0.5 w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                        </label>
+
+                        <span
+                          className={`text-sm ${
+                            av.available ? "text-blue-600" : "text-gray-400"
+                          }`}
+                        >
+                          {av.available ? "Available" : "Not Available"}
+                        </span>
+                      </div>
+
+                      {/* Right Section (Time Inputs) */}
+                      {av.available && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-500">From</span>
+                          <input
+                            type="time"
+                            value={av.startTime || ""}
+                            onChange={(e) =>
+                              updateAvailability(idx, "startTime", e.target.value)
+                            }
+                            className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+                          />
+
+                          <span className="text-gray-400">—</span>
+
+                          <span className="text-sm text-gray-500">To</span>
+                          <input
+                            type="time"
+                            value={av.endTime || ""}
+                            onChange={(e) =>
+                              updateAvailability(idx, "endTime", e.target.value)
+                            }
+                            className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+                          />
+                        </div>
+                      )}
                     </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+
+            {/* Certifications */}
+            {activeTab === "certifications" && (
+              <div>
+
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Certifications & Qualificationss
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Add your teaching certifications and qualifications
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      addComplexToArray("certifications", {
+                        name: "",
+                        issuer: "",
+                        year: null,
+                        certificateImage: "",
+                        certificateLink: "",
+                      })
+                    }
+                    className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                  >
+                    + Add Certification
+                  </button>
+                </div>
+
+                {/* Certification Cards */}
+                <div className="space-y-4">
+                  {(formData?.profile?.certifications ?? []).map(
+                    (cert: any, idx: number) => {
+                      return (
+                        <div
+                          key={idx}
+                          className="border border-gray-200 rounded-xl p-4 bg-gray-50"
+                        >
+                          {/* Top Section */}
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h4 className="font-semibold text-gray-800">
+                                {cert?.name || "Certification Name"}
+                              </h4>
+
+                              <div className="flex gap-10 mt-2 text-sm text-gray-600">
+                                <div>
+                                  <p className="text-xs text-gray-400">Issuer</p>
+                                  <p>{cert?.issuer || "-"}</p>
+                                </div>
+
+                                <div>
+                                  <p className="text-xs text-gray-400">Year</p>
+                                  <p>{cert?.year || "-"}</p>
+                                </div>
+                              </div>
+
+                              {cert?.certificateLink && (
+                                <a
+                                  href={cert.certificateLink}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-blue-600 text-sm mt-2 inline-block"
+                                >
+                                  View Certificate →
+                                </a>
+                              )}
+                            </div>
+
+                            {/* Delete */}
+                            <button
+                              type="button"
+                              onClick={() => removeFromArray("certifications", idx)}
+                              className="text-red-500 hover:text-red-600"
+                            >
+                              🗑
+                            </button>
+                          </div>
+
+                          {/* Divider */}
+                          <div className="border-t my-4"></div>
+
+                          {/* Inputs */}
+                          <div className="grid md:grid-cols-2 gap-4 mb-4">
+                            <input
+                              type="text"
+                              placeholder="Certification Name"
+                              value={cert?.name || ""}
+                              onChange={(e) =>
+                                updateObjectInArray(
+                                  "certifications",
+                                  idx,
+                                  "name",
+                                  e.target.value
+                                )
+                              }
+                              className="input-field"
+                            />
+
+                            <input
+                              type="text"
+                              placeholder="Issuer"
+                              value={cert?.issuer || ""}
+                              onChange={(e) =>
+                                updateObjectInArray(
+                                  "certifications",
+                                  idx,
+                                  "issuer",
+                                  e.target.value
+                                )
+                              }
+                              className="input-field"
+                            />
+
+                            <input
+                              type="number"
+                              placeholder="Year"
+                              value={cert?.year || ""}
+                              onChange={(e) =>
+                                updateObjectInArray(
+                                  "certifications",
+                                  idx,
+                                  "year",
+                                  parseInt(e.target.value, 10) || null
+                                )
+                              }
+                              className="input-field"
+                            />
+
+                            <input
+                              type="url"
+                              placeholder="Certificate Link (optional)"
+                              value={cert?.certificateLink || ""}
+                              onChange={(e) =>
+                                updateObjectInArray(
+                                  "certifications",
+                                  idx,
+                                  "certificateLink",
+                                  e.target.value
+                                )
+                              }
+                              className="input-field"
+                            />
+                          </div>
+
+                          {/* Upload */}
+                          <div>
+                            <label className="text-sm text-gray-600 block mb-1">
+                              Upload Certificate Image
+                            </label>
+
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+
+                                updateObjectInArray(
+                                  "certifications",
+                                  idx,
+                                  "certificateImage",
+                                  file
+                                );
+                              }}
+                              className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white"
+                            />
+
+                            {/* Preview */}
+                            {cert?.certificateImage && (
+                              <img
+                                src={
+                                  cert.certificateImage instanceof File
+                                    ? URL.createObjectURL(cert.certificateImage)
+                                    : certPreviews?.[idx] || ""
+                                }
+                                alt="Cert"
+                                className="w-32 h-32 mt-3 object-cover rounded-lg border"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
                   )}
                 </div>
-              ))}
+              </div>
+            )}
+
+
+            {/* Media & Social */}
+            {activeTab === "media" && (
+              <div>
+                
+                {/* Header */}
+                <h3 className="text-xl font-bold text-gray-900">
+                  Media & Social Links
+                </h3>
+                <p className="text-sm text-gray-500 mt-1 mb-6">
+                  Add your demo video and social media links to showcase your teaching style
+                </p>
+
+                <div className="space-y-5">
+
+                  {/* Demo Video */}
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-1">
+                      <Youtube size={16} className="text-red-500" />
+                      Demo Video URL (YouTube)
+                    </label>
+                    <p className="text-xs text-gray-400 mb-2">
+                      Add a video introducing yourself and your teaching style
+                    </p>
+                    <input
+                      type="url"
+                      name="profile.demoVideo"
+                      value={formData.profile.demoVideo}
+                      onChange={handleChange}
+                      placeholder="https://youtube.com/watch?v=..."
+                      className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+
+                  {/* Instagram */}
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-1">
+                      <Instagram size={16} className="text-pink-500" />
+                      Instagram URL
+                    </label>
+                    <input
+                      type="url"
+                      name="profile.socialMedia.instagram"
+                      value={formData.profile.socialMedia.instagram}
+                      onChange={handleChange}
+                      placeholder="https://instagram.com/username"
+                      className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-pink-500 outline-none"
+                    />
+                  </div>
+
+                  {/* LinkedIn */}
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-1">
+                      <Linkedin size={16} className="text-blue-600" />
+                      LinkedIn URL
+                    </label>
+                    <input
+                      type="url"
+                      name="profile.socialMedia.linkedin"
+                      value={formData.profile.socialMedia.linkedin}
+                      onChange={handleChange}
+                      placeholder="https://linkedin.com/in/username"
+                      className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-blue-600 outline-none"
+                    />
+                  </div>
+
+                  {/* YouTube Channel */}
+                  <div>
+                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-1">
+                      <Youtube size={16} className="text-red-500" />
+                      YouTube Channel URL
+                    </label>
+                    <input
+                      type="url"
+                      name="profile.socialMedia.youtube"
+                      value={formData.profile.socialMedia.youtube}
+                      onChange={handleChange}
+                      placeholder="https://youtube.com/@channel"
+                      className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-red-500 outline-none"
+                    />
+                  </div>
+
+                  {/* Website */}
+                  {/* <div>
+                    <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-1">
+                      <Globe size={16} className="text-gray-500" />
+                      Website / Portfolio (Optional)
+                    </label>
+                    <input
+                      type="url"
+                      name="profile.website"
+                      value={formData.profile.website}
+                      onChange={handleChange}
+                      placeholder="https://yourwebsite.com"
+                      className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-gray-500 outline-none"
+                    />
+                  </div> */}
+
+                  {/* Preview Tip Box */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm">
+                    <p className="text-blue-700 font-medium mb-1">💡 Preview Tip</p>
+                    <p className="text-blue-600 text-xs">
+                      Students will be able to view your demo video and follow your social
+                      media accounts from your public profile
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            
+
+            {/*Submit/ Update Profile & Loading  */}
+            {activeTab !== 'security' && (
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData({
+                    name: user?.name || "",
+                    email: user?.email || "",
+                    profile: defaultProfile,
+                  });
+                  setSuccess("");
+                  setError("");
+                }}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50"
+              >
+                {loading ? "Saving..." : "Save Changes"}
+              </button>
             </div>
-          </div>
+            )}
+          </form>
+          
 
-          {/* Media & Social */}
-          <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-4">
-              Media & Social Links
-            </h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Demo Video URL (YouTube)
-                </label>
-                <input
-                  type="url"
-                  name="profile.demoVideo"
-                  value={formData.profile.demoVideo}
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder="https://www.youtube.com/watch?v=..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Instagram URL
-                </label>
-                <input
-                  type="url"
-                  name="profile.socialMedia.instagram"
-                  value={formData.profile.socialMedia.instagram}
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder="https://instagram.com/username"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  YouTube URL
-                </label>
-                <input
-                  type="url"
-                  name="profile.socialMedia.youtube"
-                  value={formData.profile.socialMedia.youtube}
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder="https://youtube.com/channel/..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  LinkedIn URL
-                </label>
-                <input
-                  type="url"
-                  name="profile.socialMedia.linkedin"
-                  value={formData.profile.socialMedia.linkedin}
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder="https://linkedin.com/in/username"
-                />
-              </div>
-            </div>
-          </div>
-          {/*Submit/ Update Profile & Loading  */}
-          <div className="flex gap-3">
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary disabled:opacity-50"
-            >
-              {loading ? "Updating..." : "Update Profile"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setFormData({
-                  name: user?.name || "",
-                  email: user?.email || "",
-                  profile: defaultProfile,
-                });
-                setSuccess("");
-                setError("");
-              }}
-              className="btn-ghost"
-            >
-              Reset
-            </button>
-          </div>
-        </form>
+          {/* Security (password change) */}
+            {activeTab === 'security' && (
+            <SecurityTab />
+            )}
+          
+        </div>
         
-      </div>
+      
     </div>
   );
 };

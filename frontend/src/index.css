@@ -261,4 +261,13 @@
   font-style: normal;
 }
 
+.animated-shadow {
+  filter: drop-shadow(0 0 15px #7BA4D0);
+  animation: pulseShadow 2.5s infinite;
+}
 
+@keyframes pulseShadow {
+  0% { filter: drop-shadow(0 0 10px #024aac); }
+  50% { filter: drop-shadow(0 0 30px #7BA4D0); }
+  100% { filter: drop-shadow(0 0 10px #024aac); }
+}

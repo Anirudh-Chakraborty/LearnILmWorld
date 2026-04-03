@@ -14,6 +14,13 @@ export default defineConfig({
         secure: false,
         // rewrite optional — here it keeps the /api path as-is
         rewrite: (path) => path
+      },
+
+      '/preview': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path
       }
     }
   }
