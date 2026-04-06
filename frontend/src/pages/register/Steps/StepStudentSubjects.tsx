@@ -66,6 +66,7 @@ const LANGUAGES = [
   "English",
   "Hindi",
   "Bengali",
+  "Sanskrit",
   "Spanish",
   "French",
   "German",
@@ -267,7 +268,7 @@ export default function StepStudentSubjects({
 
   return (
     <div className="h-full flex flex-col justify-between">
-      <div className="flex-1 overflow-y-auto pr-1">
+      <div className="flex-1  pr-1">
         <h3 className="text-lg font-bold mb-4">Tell us more</h3>
 
         {/* SUBJECTS */}

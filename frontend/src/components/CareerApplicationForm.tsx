@@ -203,7 +203,7 @@ export default function CareerApplicationForm({ onClose }: Props) {
                         </svg>
                     </div>
                     <span className="text-gray-800 text-sm font-medium">
-                        {resumeFile ? resumeFile.name : "Choose File"}
+                        {resumeFile ? resumeFile.name : "Upload Resume"}
                     </span>
                     <input
                         type="file"

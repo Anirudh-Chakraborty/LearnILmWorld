@@ -72,7 +72,7 @@ const TrainerCard: React.FC<Props> = ({ trainer, learningType, sessionMode }) =>
     >
 
       {/* Top Media */}
-      {trainer.profile?.demoVideo ? (
+      {/* {trainer.profile?.demoVideo ? (
         <div className="mb-5 relative rounded-2xl overflow-hidden bg-[#e9f1fb]">
           {!openVideo ? (
             <>
@@ -107,13 +107,13 @@ const TrainerCard: React.FC<Props> = ({ trainer, learningType, sessionMode }) =>
             </>
           )}
         </div>
-      ) : (
+      ) : ( */}
         <div className="mb-5 w-full h-44 bg-[#e9f1fb] rounded-2xl overflow-hidden flex items-center justify-center">
           {previewLink
-            ? <img src={previewLink} alt={trainer.name || 'Trainer'} className="w-full h-full object-cover" />
-            : <User className="h-10 w-10 text-[#1a56ad]" />}
+            ? <img src={previewLink} alt={trainer.name || 'Trainer'} className="w-full h-full object-cover object-top" />
+            : <User className="h-10 w-10 text-[#5186cd]" />}
         </div>
-      )}
+      {/* )} */}
 
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-4">

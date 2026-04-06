@@ -36,6 +36,7 @@ import spanish_st from "../assets/Spanish_student1.jpeg";
 import japanese_st from "../assets/Japanese_student1.jpeg";
 import arab_student from "../assets/arabian_student1.jpeg";
 import indian_st from "../assets/Indian_student1.jpeg";
+import st from "../assets/start.gif";
 // import chi_student from '../assets/chinese_student.png'
 
 import spain_flag from "../assets/Spain_flag.jpeg";
@@ -747,7 +748,7 @@ export default function LandingPageAlt() {
               >
                 {/* Dark Blue Div Behind Image */}
                 <div className="absolute inset-0 flex justify-end items-end z-[-1]">
-                  <div className="bg-[#0A1172] w-full h-4/5 rounded-tl-[120px] lg:rounded-tl-[160px]  rounded-br-[40px] translate-x-8 lg:translate-x-0 translate-y-12 lg:translate-y-0"></div>
+                  <div className="bg-[#203989] w-full h-4/5 rounded-tl-[120px] lg:rounded-tl-[160px]  rounded-br-[40px] translate-x-8 lg:translate-x-0 translate-y-12 lg:translate-y-0"></div>
                 </div>
                 <img
                   src={heroImage3}
@@ -803,6 +804,14 @@ export default function LandingPageAlt() {
           </div>
         </div>
       </main>
+
+      <section >
+<div className="flex max-w-[1520px] mx-auto justify-center items-center animated-shadow">
+
+<img src={st} className="h-1/2 w-3/5 rounded-lg object-cover "  alt="loading..." />
+</div>
+
+      </section>
 
       {/* Language Levels Explanation */}
       {/*  bg-[#2D274B] */}

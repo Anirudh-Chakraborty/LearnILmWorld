@@ -224,9 +224,55 @@ router.patch('/users/:id/verify', async (req, res) => {
 
 
 
+//student
+//fetch all the student
+router.get('/students', async (req, res) => {
+    try {
+        const students = await User.find({ role: 'student' }).select('-password')
+        // Define the start of the current month outside the loop for efficiency
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const result = await Promise.all(
+            students.map(async (student) => {
+                const sessions = await Session.find({ students: student._id });
+                const bookings = await Booking.find({ student: student._id });
+                // const students = new Set(bookings.map(b => String(b.student))).size
+                const totalEarnings = bookings
+                    .filter(b => b.paymentStatus === 'completed')
+                    .reduce((sum, b) => sum + (Number(b.amount) || 0), 0);
+
+                const monthlyEarnings = bookings
+                    .filter(b => 
+                        b.paymentStatus === 'completed' && 
+                        new Date(b.createdAt) >= startOfMonth
+                    )
+                    .reduce((sum, b) => sum + (Number(b.amount) || 0), 0);
+                    
+                return {
+                    ...student.toObject(),
+                    dashboardStats: {
+                        totalSessions: student?.stats?.totalSessions||0,
+                        completedSessions: student?.stats?.completedSessions || 0,
+                        upcomingSessions: sessions.filter(s => s.status === 'scheduled').length,
+                        // totalStudents: students,
+                        totalEarnings,
+                        monthlyEarnings,
+                        // averageRating: trainer.stats?.rating || 5.0
+                    }
+                }
+            })
+        )
+
+        res.json(result)
+    } catch (err) {
+        console.error('Error fetching student stats:', err)
+        res.status(500).json({ message: 'Failed to fetch students data' })
+    }
+})
+
 // ----------trainers---------
-
-
 // Fetch all trainers with their stats
 router.get('/trainers', async (req, res) => {
     try {

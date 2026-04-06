@@ -400,7 +400,7 @@ const Register: React.FC = () => {
           {/* ------------ Multi-step Animated Container ------------ */}
           <div className="relative  min-h-[520px] overflow-hidden">
             <AnimatePresence initial={false} custom={stepIndex} mode="wait">
-              <motion.div key={currentStep} custom={stepIndex} variants={containerVariants} initial="enter" animate="center" exit="exit" transition={{ type: 'spring', stiffness: 230, damping: 24 }} className="absolute inset-0 overflow-y-auto no-scrollbar">
+              <motion.div key={currentStep} custom={stepIndex} variants={containerVariants} initial="enter" animate="center" exit="exit" transition={{ type: 'spring', stiffness: 230, damping: 24 }} className="  ">
 
                 {/* ['role', 'basic', 'trainerTeach', 'trainerSelectValues', 'trainerDocs', 'trainerDetails', 'final'] */}
                 {currentStep === 'role' && <StepRole formData={formData} setFormData={setFormData} onNext={() => goNext()} comingFromBack={comingFromBack} />}

@@ -102,7 +102,7 @@ function App() {
                   <Route path="/student/session/:id" element={<StudentJoinSession />} />
 
                   <Route path="/session/:sessionId" element={
-                    <PrivateRoute allowedRoles={['student', 'trainer']}>
+                    <PrivateRoute allowedRoles={['student', 'trainer', 'admin']}>
                       <SessionRoom />
                     </PrivateRoute>
                   } />
