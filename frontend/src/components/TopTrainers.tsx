@@ -8,6 +8,7 @@ import english from "../assets/English_Trainer.png";
 
 import TrainerBackCard, { Trainer } from "../components/TrainerBackCard";
 import { BookOpen, CheckCircle, Play, Star, Users } from "lucide-react";
+import axios from "axios";
 
 
 // const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
@@ -15,6 +16,76 @@ import { BookOpen, CheckCircle, Play, Star, Users } from "lucide-react";
 // Moved types in TrainerBackCard.tsx component
 /* small helper for rendering label */
 type PickRole = "language" | "subject" | "other";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
+const top = [
+
+      {
+        _id: "69ca438681483defd20dcc68",
+        name: "Srikrishna Baitmangalkar",
+        role: "trainer",
+        profile: {
+          imageUrl: "trainers/profiles/1774877961235-my photo 2.jpeg",
+          languages: ["Sanskrit"],
+          subjects: [],
+          hobbies: [],
+          experience: 20,
+          education: "M.A IN SANSKRIT",
+          about: "Committed to integrating  Sanskrit into creative extra-curricular activities that spark curiosity and love for learning.- Passionate about helping young learners build language confidence while preserving and promoting Indian cultural heritage."
+        },
+        pickRole: "language",
+      },
+
+      {
+        _id: "69c78acc38a980c2c07de752",
+        name: "Antara Sarkar",
+        role: "trainer",
+        profile: {
+          imageUrl: "trainers/profiles/1775029070247-Antara_Sarkar.jpg",
+          languages: ["Bengali"],
+          subjects: [],
+          hobbies: [],
+          experience: 5,
+          education: "MA,B.ED",
+          about: "I am an educator ,hailed from West Bengal. I have done my degrees from Visva-Bharati University by the great Nobel laureate Rabindranath Tagore. Teaching is for me like shaping minds for the better purpose."
+        },
+        pickRole: "language",
+      },
+
+      {
+        _id: "69bbd950c946b4e2719ae022",
+        name: "Poulami Paul",
+        role: "trainer",
+        profile: {
+          imageUrl: 'trainers/profiles/1774335181113-WhatsApp Image 2026-03-24 at 12.13.58 (1).jpeg',
+          languages: ["Hindi"],
+          subjects: [],
+          hobbies: [],
+          experience: 10,
+          education: "M.ed",
+          about: "Dedicated educator focused on simple and effective learning."
+        },
+        pickRole: "language",
+      },
+
+
+      {
+        _id: "69c26e629871a287781c303f",
+        name: "Shabana Saheed",
+        role: "trainer",
+        profile: {
+          imageUrl: "trainers/profiles/1775145254193-my pic.jpeg",
+          subjects: [],
+          languages: ["Hindi"],
+          hobbies: [],
+          experience: 12,
+          education: "M.A, D.Ed",
+          about: "I am passionate about teaching and I love helping people in gaining knowledge."
+        },
+        pickRole: "language",
+      },
+    ];
 
 export default function TopTrainers(): JSX.Element {
   const [trainers, setTrainers] = useState<Trainer[]>([]);
@@ -28,87 +99,7 @@ export default function TopTrainers(): JSX.Element {
 
 
   useEffect(() => {
-    const top = [
-
-      //  LANGUAGE TRAINERS 
-      // -------------------------
-
-      {
-        _id: "68ef33d0cad95b62472f382a",
-        name: "Shannet",
-        role: "trainer",
-        profile: {
-          imageUrl: spanish,
-          languages: ["Spanish"],
-          subjects: [],
-          experience: 14,
-          education: "Master's in Human and Social Sciences ",
-          about: "Shanat Andrea Oliveros Avendaño is a language specialist with over 14 years of teaching experience and one year of professional translation , proficient in English, French, and Spanish , with a teaching approach based on international curricula and methodologies like CLIL, IB, and Cambridge , and has successfully supported students of all ages. She holds a Master's in Human and Social Sciences - General and Comparative Literature from the University of Sorbonne Nouvelle (2020-2022) and a Bachelor's in Foreign Language Teaching from UPTC (2005-2011). She has extensive experience as a virtual Spanish instructor at multiple institutions"
-        },
-        pickRole: "language",
-      },
-
-      {
-        _id: "691c5f3ca0cce9bf08c670da",
-        name: "Sinqobile Mazibuko",
-        role: "trainer",
-        profile: {
-          imageUrl: english,
-          languages: ["English"],
-          subjects: [],
-          experience: 5,
-          education: "Certified Online English Trainer",
-          about: "Sinqobile Mazibuko is a dedicated and certified Online Teacher with five years of experience, specializing in English, IsiZulu, Mathematics, Science, and Technology, who is familiar with the Caps and IEB curriculum and teaches across the foundation, intermediate, and senior phases, offering services like home schooling, extra lessons, exam preparation, and adult ESL."
-        },
-        pickRole: "language",
-      },
-
-      {
-        _id: "691c58dba0cce9bf08c670c0",
-        name: "Esraa Mohamed",
-        role: "trainer",
-        profile: {
-          imageUrl: german,
-          languages: ["German"],
-          subjects: [],
-          experience: 10,
-          education: "Bachelor's in German Language",
-          about: "Esraa Mohamed is a motivated and energetic German Instructor with a background in designing meaningful lessons, providing positive mentoring, and enhancing student performance, and has experience in various educational institutions since 2014, and holds a Bachelor's degree in German Language from Ain Shams University, along with certifications like Goethe-Institute's B2 and several DLL (Deutsch Lehren Lernen) courses"
-        },
-        pickRole: "language",
-      },
-
-
-      // SUBJECT TRAINERS
-      // -------------------------
-
-      {
-        _id: "690dc8cb64cc3e1c19580f24",
-        name: "Alfa",
-        role: "trainer",
-        profile: {
-          imageUrl: "",
-          subjects: ["Economics", "History", "Science", "Social Studies"],
-          languages: [],
-          experience: 8,
-          education: "Master's in Technology",
-        },
-        pickRole: "subject",
-      },
-
-      // {
-      //   _id: "68ecb5fe64bc73d89ba43040",
-      //   name: "Trainer 3",
-      //   role: "trainer",
-      //   profile: {
-      //     imageUrl: "",
-      //     subjects: ["Geography", "Political Science"],
-      //     languages: [],
-      //     experience: 7,
-      //   },
-      //   pickRole: "subject",
-      // },
-    ];
+    
 
     setTrainers(top);
 
@@ -119,6 +110,42 @@ export default function TopTrainers(): JSX.Element {
     });
 
     setPickRoleMap(map);
+  }, []);
+
+  const [resolvedImages, setResolvedImages] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      const newResolvedImages: Record<string, string> = {};
+
+      for (const trainer of top) {
+        const key = trainer.profile.imageUrl;
+
+        if (!key) {
+          newResolvedImages[trainer._id] = "";
+          continue;
+        }
+
+        // If it's already a full URL or base64, use it directly
+        if (key.startsWith('http') || key.startsWith('blob:') || key.startsWith('data:')) {
+          newResolvedImages[trainer._id] = key;
+          continue;
+        }
+        try {
+          const { data } = await axios.post(`${API_BASE_URL}/api/upload/get-download-url`, {
+            fileKey: key
+          });
+          newResolvedImages[trainer._id] = data.signedUrl;
+        } catch (err) {
+          console.error(`Failed to fetch image for ${trainer.name}:`, err);
+          newResolvedImages[trainer._id] = "";
+        }
+      }
+
+      setResolvedImages(newResolvedImages);
+    };
+
+    fetchImages();
   }, []);
 
   return (
@@ -158,7 +185,7 @@ export default function TopTrainers(): JSX.Element {
                     </div>
                   </div>
                   <img
-                    src={trainer.profile?.imageUrl || trainer_profile}
+                    src={resolvedImages[trainer._id] ||trainer.profile?.imageUrl || trainer_profile}
                     alt={trainer.name}
                     className="w-full h-full object-cover object-top"
                   />
@@ -272,6 +299,7 @@ export default function TopTrainers(): JSX.Element {
             >
               <TrainerBackCard
                 trainer={activeTrainer}
+                resolvedImageUrl={resolvedImages[activeTrainer._id]}
                 displayList={
                   activeTrainer.profile?.languages?.length
                     ? activeTrainer.profile.languages

@@ -805,13 +805,13 @@ export default function LandingPageAlt() {
         </div>
       </main>
 
-      <section >
+      {/* <section >
 <div className="flex max-w-[1520px] mx-auto justify-center items-center animated-shadow">
 
 <img src={st} className="h-1/2 w-3/5 rounded-lg object-cover "  alt="loading..." />
 </div>
 
-      </section>
+      </section> */}
 
       {/* Language Levels Explanation */}
       {/*  bg-[#2D274B] */}

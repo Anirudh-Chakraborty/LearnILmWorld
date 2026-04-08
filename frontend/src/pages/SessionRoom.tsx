@@ -300,9 +300,25 @@ const SessionRoom = () => {
   useEffect(() => {
     if (!notification) return;
 
+
+    // Scahre Error Debug due to 100ms connection issues (from SessionRoom1)
+    // User Throw out if Share Screen cancelled
     if (notification.type === 'ERROR') {
-      console.error("[100ms Background Error]:", notification.data);
-      setError(notification.data?.message || "100ms Connection Error");
+      const msg = notification.data?.message || "";
+
+      // Ignore screen share cancel / permission errors
+      if (
+        msg.includes("NotAllowedError") ||
+        msg.includes("permission") ||
+        msg.includes("Permission denied") ||
+        msg.includes("AbortError")
+      ) {
+        console.warn("Non-fatal error (ignored):", msg);
+        return;
+      }
+
+      console.error("[100ms Background Error]:", msg);
+      setError(msg || "100ms Connection Error");
     }
 
     if (notification.type === HMSNotificationTypes.ROOM_ENDED || notification.type === HMSNotificationTypes.REMOVED_FROM_ROOM) {
