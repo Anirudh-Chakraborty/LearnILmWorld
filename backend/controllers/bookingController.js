@@ -45,7 +45,8 @@ export const accessFreeDemo = async (req, res) => {
 
 
       status: 'completed',
-      paymentStatus: 'na', 
+      paymentStatus: 'na',
+      paymentGateway: 'none', 
       paymentMethod: 'none',
       amount: 0
     });

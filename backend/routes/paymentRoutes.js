@@ -82,10 +82,14 @@ router.post('/store-payment', authenticate, async (req, res) => {
       {
         paymentId,
         paymentStatus: status === 'succeeded' ? 'completed' : 'failed',
+        paymentGateway,
+        paymentMethod: paymentMethod || 'card',
+        status: status === 'succeeded' ? 'confirmed' : 'pending',
         paymentDetails: {
           amount,
           currency,
-          paymentMethod,
+          paymentMethod: paymentMethod || 'card',
+          paymentGateway,
           status,
           receiptUrl,
           processedAt: new Date()
@@ -228,17 +232,27 @@ router.post('/verify-razorpay-payment', authenticate, async (req, res) => {
 
     // Verify signature
     if (razorpay_signature === expectedSign) {
+      //fetch payment details from Razorpay to get the payment method
+      const payment = await razorpay.payments.fetch(razorpay_payment_id);
+
+      // Update booking with payment details
+      const actualMethod = payment.method;
+
       const booking = await Booking.findByIdAndUpdate(
         bookingId,
         {
           paymentId: razorpay_payment_id,
           paymentStatus: 'completed',
           status: 'confirmed',
+          paymentGateway: 'Razorpay',
+          paymentMethod: actualMethod, // 🔥 REAL VALUE
+          
           paymentDetails: {
             amount,
             currency,
-            paymentMethod: 'razorpay',
-            status: 'succeeded',
+            paymentMethod: actualMethod,
+            paymentGateway: 'Razorpay',
+            status: payment.status,
             processedAt: new Date()
           }
         },

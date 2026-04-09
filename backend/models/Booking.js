@@ -38,8 +38,8 @@ const bookingSchema = new mongoose.Schema({
     required: true
   },
   date: { type: String }, 
-time: { type: String },
-duration: { type: Number},
+  time: { type: String },
+  duration: { type: Number},
   status: {
     type: String,
     enum: ['pending', 'confirmed', 'completed', 'cancelled'],
@@ -53,10 +53,18 @@ duration: { type: Number},
     default: 'pending'
   },
 
+  //payment Gateway
+
+  paymentGateway: {
+    type: String,
+    enum: ['Stripe', 'Razorpay', 'Fake' ,'none'], //none for free demo
+    required: true
+  },
+
   // For paid bookings
   paymentMethod: {
     type: String,
-    enum: ['stripe', 'fake', 'none', 'razorpay'], //none for free demo
+    enum: ['upi', 'card', 'net_banking', 'wallet', 'none'],   
     required: true
   },
   
@@ -71,6 +79,7 @@ duration: { type: Number},
   paymentDetails: {
     amount: Number,
     currency: String,
+    paymentGateway: String,
     paymentMethod: String,
     status: String,
     receiptUrl: String,
