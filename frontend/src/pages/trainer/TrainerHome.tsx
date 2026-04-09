@@ -41,6 +41,7 @@ const TrainerHome = () => {
 
   const [earningsData, setEarningsData] = useState<any[]>([])
   const [recentBookings, setRecentBookings] = useState<any[]>([])
+  const [sessionData, setSessionData] = useState<any[]>([])
 
   useEffect(() => {
     fetchDashboard()
@@ -75,6 +76,54 @@ const TrainerHome = () => {
       const bookings = bookingsRes.data || []
       const userData = userRes.data || {}
 
+
+      const generateSessionMonthlyData = (sessions: any[]) => {
+        const monthlyMap: Record<string, number> = {};
+
+        sessions.forEach((s) => {
+          const date = new Date(s.createdAt); 
+
+          const key = date.toLocaleString("en-US", {
+            month: "short",
+            year: "numeric",
+          });
+
+          monthlyMap[key] = (monthlyMap[key] || 0) + 1;
+        });
+
+        // return Object.entries(monthlyMap)
+        //   .map(([label, count]) => ({
+        //     label,
+        //     sessions: count,
+        //   }))
+        //   .sort((a, b) => {
+        //     return new Date(a.label + " 1").getTime() - new Date(b.label + " 1").getTime();
+        //   });
+
+        // Generate last 6 months (IMPORTANT FIX)
+        const result = [];
+        const now = new Date();
+
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+
+          const label = d.toLocaleString("en-US", {
+            month: "short",
+            year: "numeric",
+          });
+
+          result.push({
+            label,
+            sessions: monthlyMap[label] || 0, // fill 0 if no data
+          });
+        }
+
+        return result;
+      };
+      
+      
+
+
       const completedBookings = bookings.filter((b: any) => b.paymentStatus === "completed");
       // Calculate Monthly Earnings dynamically
       const now = new Date();
@@ -91,6 +140,7 @@ const TrainerHome = () => {
           upcomingSet.add(`${b.date}_${b.time}_${b.bookingType}`);
         }
       });
+
       setStats({
         students: new Set(bookings.map((b: any) => b.student?._id)).size,
         rating: userData.stats?.rating || 5,
@@ -102,6 +152,7 @@ const TrainerHome = () => {
       })
       setRecentBookings(completedBookings.slice(0, 3))
       setEarningsData(generateMonthlyData())
+      setSessionData(generateSessionMonthlyData(sessions))
     } finally {
       setLoading(false)
     }
@@ -128,12 +179,12 @@ const TrainerHome = () => {
       icon: Star,
       colorClass: "text-blue-600 bg-blue-50"
     },
-    {
-      label: "Total Earnings",
-      value: `$${stats.earnings}`,
-      icon: DollarSign,
-      colorClass: "text-blue-600 bg-blue-50"
-    },
+    // {
+    //   label: "Total Earnings",
+    //   value: `$${stats.earnings}`,
+    //   icon: DollarSign,
+    //   colorClass: "text-blue-600 bg-blue-50"
+    // },
     {
       label: "Total Sessions",
       value: stats.totalSessions,
@@ -152,12 +203,12 @@ const TrainerHome = () => {
       icon: Clock,
       colorClass: "text-blue-600 bg-blue-50"
     },
-    {
-    label: 'Monthly Earnings',
-    value: `$${stats.monthlyEarnings?.toFixed(2) || '0.00'}`,
-    icon: TrendingUp, 
-    colorClass: 'text-blue-600 bg-blue-50',
-  },
+  //   {
+  //   label: 'Monthly Earnings',
+  //   value: `$${stats.monthlyEarnings?.toFixed(2) || '0.00'}`,
+  //   icon: TrendingUp, 
+  //   colorClass: 'text-blue-600 bg-blue-50',
+  // },
   ];
 
   return (
@@ -179,7 +230,7 @@ const TrainerHome = () => {
 
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={earningsData} margin={{ left: 10, right: 20, bottom: 30 }}>
+            <LineChart data={sessionData} margin={{ left: 10, right: 20, bottom: 30 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#5381be" />
 
               <XAxis dataKey="label">
@@ -192,9 +243,9 @@ const TrainerHome = () => {
                 />
               </XAxis>
 
-              <YAxis>
+              <YAxis allowDecimals={false}>
                 <Label
-                  value="Earnings ($)"
+                  value="Sessions Count"
                   angle={-90}
                   position="insideLeft"
                   fill="#5186CC"
@@ -206,7 +257,7 @@ const TrainerHome = () => {
 
               <Line
                 type="monotone"
-                dataKey="earnings"
+                dataKey="sessions"
                 stroke="#5186CC"
                 strokeWidth={3}
                 dot={{ r: 5 }}

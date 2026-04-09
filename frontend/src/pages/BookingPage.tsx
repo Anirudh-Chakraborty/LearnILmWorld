@@ -78,6 +78,7 @@ const BookingPage = () => {
   const displayDuration = bookingDetails.duration ? `${bookingDetails.duration} minutes` : '60 minutes'; // fallback for group if not passed
   const finalPrice = bookingDetails.price || 0;
 
+
   // --- Payment Handler ---
   const handlePayment = async () => {
     setError('');
@@ -118,7 +119,7 @@ const BookingPage = () => {
         amount: nationalityCode === 'IN' ? finalPrice*95 : finalPrice,
         currency: nationalityCode === 'IN' ? 'INR' : 'USD' 
       });
-      
+
       const { id: order_id, currency, amount } = orderResponse.data;
 
       // 2. Create pending booking
