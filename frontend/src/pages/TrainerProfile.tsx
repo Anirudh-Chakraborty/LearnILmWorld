@@ -174,7 +174,9 @@ const TrainerProfile: React.FC = () => {
   //     }))
   // }
 
-  if (loading || !trainer) return <div className="min-h-screen flex items-center justify-center text-blue-600 font-medium">Loading profile...</div>
+  if (loading || !trainer) return <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+        <div className="loading-dots mb-4"><div></div><div></div><div></div><div></div></div>
+      </div>
 
   const getCategoryIcon = () => {
     if (isHobby) return <Heart className="text-blue-500" size={24} />;
@@ -253,7 +255,7 @@ const TrainerProfile: React.FC = () => {
                 {activeTab !== 'profile' && (
                   <button
                     onClick={() => setActiveTab('profile')}
-                    className="mt-2 text-blue-200/80 hover:text-white transition text-sm underline"
+                    className="mt-2 text-white transition text-sm underline"
                   >
                     ← Back to Profile Information
                   </button>

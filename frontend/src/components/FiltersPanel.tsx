@@ -65,7 +65,7 @@ const SUBJECTS = [
 
 
 const HOBBIES = [
-    'Astrology','Dance', 'Singing', 'Guitar', 'Piano', 'Photography', 'Yoga', 'Fitness', 'Cooking', 'Drawing', 'Painting'
+    'Astrology','Dancing', 'Singing', 'Guitar', 'Piano', 'Photography', 'Yoga', 'Fitness', 'Cooking', 'Drawing', 'Painting'
 ]
 
 

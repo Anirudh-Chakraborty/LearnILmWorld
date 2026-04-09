@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import trainer_profile from "../assets/trainer_profile.png";
+import axios from "axios";
+import { useEffect } from "react";
 
 /* -------------------------
    Types
@@ -31,15 +33,21 @@ interface TrainerBackCardProps {
     displayList: string[];
     variant?: "grid" | "modal";
     className?: string;
+    resolvedImageUrl?: string;
 }
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export default function TrainerBackCard({
     trainer,
     displayList,
     variant = "grid",
     className = "",
+    resolvedImageUrl,
 }: TrainerBackCardProps) {
     const isModal = variant === "modal";
+    const displayImage = resolvedImageUrl || trainer.profile?.imageUrl || trainer_profile;
+
 
     return (
         <div
@@ -73,7 +81,7 @@ export default function TrainerBackCard({
                 <div className={`${isModal ? "w-[160px] shrink-0" : "text-center"}`}>
                     <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-md bg-white mx-auto">
                         <img
-                            src={trainer.profile?.imageUrl || trainer_profile}
+                            src={displayImage}
                             alt={trainer.name}
                             className="w-full h-full object-cover"
                         />
