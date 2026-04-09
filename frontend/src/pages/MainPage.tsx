@@ -1,28 +1,29 @@
 // FILE: src/pages/MainPage.tsx
 import React, { useState, useCallback, useEffect } from 'react'
-// import { Link } from 'react-router-dom'
-// import { motion } from 'framer-motion'
 import Footer from '../components/Footer'
-// import bg_img from '../assets/bg_main.jpeg'
-// import logo from '../assets/header_logo.jpeg'
 import SearchBar from '../components/SearchBar'
 import LearningTypeSelector from '../components/LearningTypeSelector'
 import FiltersPanel from '../components/FiltersPanel'
 import TrainersGrid from '../components/TrainersGrid'
 import { useAuth } from '../contexts/AuthContext'
-// import CurrencySelector from '../components/CurrencySelector'
-// import { Button, Offcanvas, Nav } from 'react-bootstrap'
 import Navbar from '../components/Navbar'
 import { useSearchParams } from 'react-router-dom'
-
+import { color } from 'framer-motion'
 
 const MainPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [learningType, setLearningType] = useState<'language' | 'subject' | 'hobby'>('language')
   const [languageMode, setLanguageMode] = useState<string>('subject')
-  const [searchParams] = useSearchParams();
+  
+  //  Added setSearchParams so that we can clear the URL.
+  const [searchParams, setSearchParams] = useSearchParams(); 
 
-  // const [showOffcanvas, setShowOffcanvas] = useState(false);
+ 
+  //  find word from navbar
+  const navSearchTerm = searchParams.get('search') || '';
+  
+   
+  const finalSearchTerm = searchTerm || navSearchTerm;
 
   useEffect(() => {
     const typeParam = searchParams.get('type');
@@ -63,18 +64,14 @@ const MainPage: React.FC = () => {
 
   const getDashboardPath = () => {
     if (!user) return "/login";
-
     const role = user.role.toLowerCase();
-
     if (role === "student") return "/student";
     if (role === "trainer") return "/trainer";
     if (role === "admin") return "/admin";
-
     return "/main"; // fallback
   };
 
   const [nationalities, setNationalities] = useState<string[]>([])
-
 
   const [filters, setFilters] = useState<any>({
     language: '',
@@ -90,7 +87,6 @@ const MainPage: React.FC = () => {
     openDropdown: null
   })
 
-
   const clearFilters = useCallback(() => {
     setFilters({
       language: '',
@@ -102,16 +98,18 @@ const MainPage: React.FC = () => {
       rating: '',
       sortBy: 'rating',
       nationality: '',
+      sessionType: '',
       openDropdown: null
     })
     setSearchTerm('')
-  }, [])
-
+    
+    // remove word from url if apply filter
+    setSearchParams(new URLSearchParams());
+  }, [setSearchParams]) 
 
   return (
     <>
       <div className="min-h-screen bg-fixed  text-[#2D274B]">
-
 
         {/* Floating decorative orbs */}
         <div className="fixed inset-0 pointer-events-none">
@@ -146,7 +144,6 @@ const MainPage: React.FC = () => {
             <SearchBar value={searchTerm} onChange={setSearchTerm} />
           </div>
 
-
           {/* Learning Type Selector + Filters */}
           <div className="max-w-6xl mx-auto mb-10 px-4">
             <div className="flex justify-center mb-6 w-full">
@@ -162,10 +159,9 @@ const MainPage: React.FC = () => {
 
           </div>
 
-
           {/* Trainers Grid (fetching + pagination inside) */}
-          <TrainersGrid searchTerm={searchTerm} filters={filters} learningType={learningType} setNationalities={setNationalities} />
-
+          {/* final search*/}
+          <TrainersGrid searchTerm={finalSearchTerm} filters={filters} learningType={learningType} setNationalities={setNationalities} />
 
         </main>
 
@@ -174,6 +170,5 @@ const MainPage: React.FC = () => {
     </>
   )
 }
-
 
 export default MainPage

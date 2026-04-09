@@ -15,6 +15,7 @@ import courseRoutes from './routes/courseRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import dotenv from 'dotenv';
 import ClassScheduleRoutes from './routes/classScheduleRoutes.js';
+import { clear } from 'google-auth-library/build/src/auth/envDetect.js';
 
 dotenv.config();
 
@@ -93,9 +94,10 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5001;
+const Mongo = process.env.MONGO_URI;
 
 // Connect to MongoDB and start server
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(Mongo)
   .then(() => {
     console.log('MongoDB connected');
     app.listen(PORT, () => {
