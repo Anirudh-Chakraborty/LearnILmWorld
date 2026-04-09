@@ -330,6 +330,7 @@ router.post('/end-room/:id', authenticate, async (req, res) => {
 
     res.json({ success: true, message: 'Session ended' })
   } catch (err) {
+    console.error("[Session] Error in /end-room route:", err.message);
     res.status(500).json({ message: err.message })
   }
 })
@@ -405,6 +406,7 @@ router.post('/end-room/:id', authenticate, async (req, res) => {
 // })
 
 //100ms session status updates
+
 router.put('/:id/status', authenticate, authorize(['trainer', 'admin']), async (req, res) => {
   const { status, roomId } = req.body // Destructure roomId from body
   const ALLOWED = ['scheduled', 'active', 'cancelled', 'ended'] // Added ended if needed here
