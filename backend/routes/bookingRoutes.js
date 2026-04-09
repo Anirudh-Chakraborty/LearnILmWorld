@@ -10,7 +10,7 @@ const router = express.Router();
 // Create booking
 router.post("/", authenticate, async (req, res) => {
   try {
-    const { trainerId, studentName, studentEmail, paymentMethod, amount, bookingType, date, time, duration, classId } = req.body;
+    const { trainerId, studentName, studentEmail, paymentMethod, paymentGateway, amount, bookingType, date, time, duration, classId } = req.body;
     
     const booking = new Booking({
       student: req.user._id,
@@ -18,6 +18,7 @@ router.post("/", authenticate, async (req, res) => {
       studentName,
       studentEmail,
       paymentMethod,
+      paymentGateway,
       amount,
       bookingType,
       date,        
@@ -118,13 +119,14 @@ router.put("/:id/status", authenticate, async (req, res) => {
 // Update payment status
 router.put("/:id/payment", authenticate, async (req, res) => {
   try {
-    const { paymentStatus, paymentId } = req.body;
+    const { paymentStatus, paymentId, paymentGateway } = req.body;
 
     const booking = await Booking.findByIdAndUpdate(
       req.params.id,
       {
         paymentStatus,
         paymentId,
+        paymentGateway: paymentGateway || 'Razorpay',
         status: paymentStatus === "completed" ? "confirmed" : "pending",
       },
       { new: true },

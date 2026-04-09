@@ -126,9 +126,10 @@ const BookingPage = () => {
         trainerId: trainerId,
         studentName: user?.name || 'Student',
         studentEmail: user?.email,
-        paymentMethod: 'razorpay',
+        paymentMethod: 'none', // will be updated after payment success
+        paymentGateway: 'Razorpay',
         amount: Number(finalPrice),
-        bookingType: bookingDetails.type || (finalPrice === 0 ? 'free demo' : 'private'),
+        bookingType: bookingDetails.type === 'free_demo' ? 'free_demo' : (bookingDetails.type || (finalPrice === 0 ? 'free_demo' : 'private')),
         date: bookingDetails.date,
         time: bookingDetails.time,
         duration: bookingDetails.duration,
