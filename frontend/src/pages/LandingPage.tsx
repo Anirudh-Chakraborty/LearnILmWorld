@@ -51,8 +51,8 @@ import arab_flag from "../assets/arab_flag.jpeg";
 // import heroImage2 from '../assets/Hero_image2.jpg'
 
 import heroImage3 from "../assets/together child1.png";
-import astro from "../assets/astrology.jpeg"
-import astrology from "../assets/astrology.png"
+import astro from "../assets/astrology.jpeg";
+import astrology from "../assets/astrology.png";
 
 import math from "../assets/Maths_new.jpeg";
 import hist from "../assets/History_new.png";
@@ -78,7 +78,9 @@ export default function LandingPageAlt() {
   // const [showOffcanvas, setShowOffcanvas] = useState(false)
   const [activeFaq, setActiveFaq] = useState("learner");
 
-  const [activeCategory, setActiveCategory] = useState<"popular" | "asian" | "euro" | "africa" | "more">("popular");
+  const [activeCategory, setActiveCategory] = useState<
+    "popular" | "asian" | "euro" | "africa" | "more"
+  >("popular");
 
   const [showMore, setShowMore] = useState(false);
   const [showMoreLanguages, setShowMoreLanguages] = useState(false);
@@ -88,14 +90,13 @@ export default function LandingPageAlt() {
   const { user } = useAuth();
 
   const PHRASES: string[] = [
-    "Welcome to LearniLMWorld",           // English
-    "LearniLMWorld में आपका स्वागत है",   // Hindi
-    "LearniLMWorld-এ স্বাগতম",           // Bengali
-    "Bienvenue à LearniLMWorld",          // French
-    "Willkommen bei LearniLMWorld",        // German
-    "LearnilmWorldへようこそ",            //Japanese
+    "Welcome to LearniLMWorld", // English
+    "LearniLMWorld में आपका स्वागत है", // Hindi
+    "LearniLMWorld-এ স্বাগতম", // Bengali
+    "Bienvenue à LearniLMWorld", // French
+    "Willkommen bei LearniLMWorld", // German
+    "LearnilmWorldへようこそ", //Japanese
   ];
-
 
   const [currentText, setCurrentText] = useState<string>("");
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -135,52 +136,56 @@ export default function LandingPageAlt() {
 
     // Determine the current speed based on the action
     const timerSpeed = isDeleting ? deletingSpeed : typingSpeed;
-    const timer = setTimeout(handleTyping, currentText === "" && !isDeleting ? pauseBeforeType : timerSpeed);
+    const timer = setTimeout(
+      handleTyping,
+      currentText === "" && !isDeleting ? pauseBeforeType : timerSpeed,
+    );
 
     return () => clearTimeout(timer);
   }, [currentText, isDeleting, currentIndex]);
 
   //Updated common code
   const handleCommonClick = (itemName: string) => {
-  const formattedName = itemName.charAt(0).toUpperCase() + itemName.slice(1).toLowerCase();
-  const itemTrainerMap: Record<string, string> = {
-    Chemistry: "trainer_id_for_chemistry",
-    Hindi: "trainer_id_for_hindi",
-    Bengali: "trainer_id_for_bengali",
-    Marathi: "trainer_id_for_marathi", 
-    Sanskrit: "trainer_id_for_sanskrit", 
-    Astrology: "trainer_id_for_astrology", 
+    const formattedName =
+      itemName.charAt(0).toUpperCase() + itemName.slice(1).toLowerCase();
+    const itemTrainerMap: Record<string, string> = {
+      Chemistry: "trainer_id_for_chemistry",
+      Hindi: "trainer_id_for_hindi",
+      Bengali: "trainer_id_for_bengali",
+      Marathi: "trainer_id_for_marathi",
+      Sanskrit: "trainer_id_for_sanskrit",
+      Astrology: "trainer_id_for_astrology",
+    };
+
+    const trainerId = itemTrainerMap[formattedName];
+
+    if (!trainerId) {
+      alert(
+        "We are currently finalizing a top-tier expert for this. We believe in providing the best quality education, so we are taking a little extra time to find the perfect instructor.",
+      );
+      return;
+    }
+    const languages = ["Sanskrit", "Hindi", "Marathi", "Bengali"];
+    const subjects = ["Chemistry"];
+    const hobbies = ["Astrology"];
+
+    let targetUrl = "";
+    if (languages.includes(formattedName)) {
+      targetUrl = `/main?type=language&language=${encodeURIComponent(formattedName)}`;
+    } else if (subjects.includes(formattedName)) {
+      targetUrl = `/main?type=subject&subject=${encodeURIComponent(formattedName)}`;
+    } else if (hobbies.includes(formattedName)) {
+      targetUrl = `/main?type=hobby&hobby=${encodeURIComponent(formattedName)}`;
+    } else {
+      return;
+    }
+    if (!user) {
+      localStorage.setItem("redirectAfterLogin", targetUrl);
+      navigate("/login");
+    } else {
+      navigate(targetUrl);
+    }
   };
-
-  const trainerId = itemTrainerMap[formattedName];
-
-  if (!trainerId) {
-    alert(
-      "We are currently finalizing a top-tier expert for this. We believe in providing the best quality education, so we are taking a little extra time to find the perfect instructor."
-    );
-    return;
-  }
-  const languages = ['Sanskrit', 'Hindi', 'Marathi', 'Bengali'];
-  const subjects = ['Chemistry'];
-  const hobbies = ['Astrology'];
-
-  let targetUrl = "";
-  if (languages.includes(formattedName)) {
-    targetUrl = `/main?type=language&language=${encodeURIComponent(formattedName)}`;
-  } else if (subjects.includes(formattedName)) {
-    targetUrl = `/main?type=subject&subject=${encodeURIComponent(formattedName)}`;
-  } else if (hobbies.includes(formattedName)) {
-    targetUrl = `/main?type=hobby&hobby=${encodeURIComponent(formattedName)}`;
-  } else {
-    return; 
-  }
-  if (!user) {
-    localStorage.setItem("redirectAfterLogin", targetUrl);
-    navigate("/login");
-  } else {
-    navigate(targetUrl);
-  }
-};
 
   // languages
   const handleLanguageClick = async (language: any) => {
@@ -243,7 +248,9 @@ export default function LandingPageAlt() {
       );
       navigate("/login");
     } else {
-      navigate(`/main?type=language&language=${encodeURIComponent(languageName)}`);
+      navigate(
+        `/main?type=language&language=${encodeURIComponent(languageName)}`,
+      );
     }
 
     setShowMoreLanguages(false);
@@ -354,7 +361,9 @@ export default function LandingPageAlt() {
       );
       navigate("/login");
     } else {
-      navigate(`/main?type=subject&subject=${encodeURIComponent(subject.name)}`);
+      navigate(
+        `/main?type=subject&subject=${encodeURIComponent(subject.name)}`,
+      );
     }
   };
 
@@ -386,7 +395,7 @@ export default function LandingPageAlt() {
       );
       navigate("/login");
     } else {
-      navigate(`/main?type=subject&subject=${encodeURIComponent(subjectName)}`)
+      navigate(`/main?type=subject&subject=${encodeURIComponent(subjectName)}`);
     }
 
     setShowMore(false);
@@ -555,21 +564,21 @@ export default function LandingPageAlt() {
     {
       ind: "2",
       icon: BookOpen,
-      iconColor: "text-[#F29D38]", 
+      iconColor: "text-[#F29D38]",
       title: "Book a session",
       desc: "One-click booking, calendar and secure payments.",
     },
     {
       ind: "3",
       icon: Play,
-      iconColor: "text-[#009300] fill-[#009300]", 
+      iconColor: "text-[#009300] fill-[#009300]",
       title: "Practice & improve",
       desc: "Live lessons and tailored homework.",
     },
     {
       ind: "4",
       icon: Award,
-      iconColor: "text-[#DB944B]", 
+      iconColor: "text-[#DB944B]",
       title: "Track progress",
       desc: "Personal dashboard, streaks, and certificates.",
     },
@@ -677,12 +686,11 @@ export default function LandingPageAlt() {
     // bg-[linear-gradient(145deg,#E6EEF9_0%,#FEF5E4_30%,#f7f1e6_70%,#E6EEF9_100%)]
     <div
       className="min-h-screen font-inter text-[#2D274B] transition-colors duration-500 "
-    // #fef5e4
+      // #fef5e4
     >
       {/* 2D274B  text- #dc8d33*/}
       {/* bg-[#6B48AF]/95 backdrop-blur-sm border-b border-white/30 text-white */}
       <Navbar />
-
       <main className="pt-14">
         {/* HERO SECTION */}
         <div className="max-w-[1520px] mx-auto px-4">
@@ -720,21 +728,21 @@ export default function LandingPageAlt() {
                 </p>
 
                 <div className="flex flex-wrap gap-4 pt-2">
-
                   {/* Book Demo */}
                   <Link
                     to="/demo"
-                    className="inline-flex items-center gap-3 px-8 py-3 bg-[#024AAC] text-white font-bold rounded-2xl border-2 border-white shadow-md hover:scale-105 transition-transform"
+                    className="inline-flex items-center gap-3 px-8 py-3 bg-[#024AAC] text-white font-bold rounded-2xl border-2 border-white shadow-md hover:scale-105 transition-transform w-64 justify-center "
                   >
                     <Play className="w-5 h-5 fill-current" />
                     Book a FREE Demo
                   </Link>
 
                   <Link
-                    to="/become-trainer"
-                    className="inline-flex items-center gap-3 px-8 py-3 bg-white text-[#024AAC] font-bold rounded-2xl border-2 border-[#024AAC] shadow-md hover:bg-gray-50 hover:scale-105 transition-colors"
+                    to="/courses"
+                    className="inline-flex  gap-3 justify-center items-center px-8 py-3 bg-white text-[#024AAC] font-bold rounded-2xl border-2 border-[#024AAC] shadow-md hover:bg-gray-50 hover:scale-105 transition-colors w-64"
                   >
-                    <User className="w-5 h-5 fill-current stroke-0" />Become a Trainer
+                    <BookOpen className="w-5 h-5 fill-current stroke-0" />
+                    Browse Courses
                   </Link>
                 </div>
               </motion.div>
@@ -763,9 +771,7 @@ export default function LandingPageAlt() {
 
         {/* Bottom features after grid*/}
         <div className="py-10 mt-10 px-6">
-
           <div className="max-w-md mx-auto grid grid-cols-1 md:grid-cols-3 md:max-w-5xl gap-y-8  justify-center">
-
             {/* Item 1 */}
             <div className="flex items-center gap-5 w-full max-w-[280px] mx-auto md:mx-0">
               <div className="flex-shrink-0 p-3 bg-white rounded-full text-[#4f88f2] shadow-lg">
@@ -784,7 +790,9 @@ export default function LandingPageAlt() {
               </div>
               <div className="flex flex-col">
                 <p className="font-bold text-2xl text-[#2D274B]">Speaking</p>
-                <p className="text-base text-gray-500 whitespace-nowrap">Focused practice</p>
+                <p className="text-base text-gray-500 whitespace-nowrap">
+                  Focused practice
+                </p>
               </div>
             </div>
 
@@ -800,11 +808,9 @@ export default function LandingPageAlt() {
                 </p>
               </div>
             </div>
-
           </div>
         </div>
       </main>
-
       {/* <section >
 <div className="flex max-w-[1520px] mx-auto justify-center items-center animated-shadow">
 
@@ -812,7 +818,6 @@ export default function LandingPageAlt() {
 </div>
 
       </section> */}
-
       {/* Language Levels Explanation */}
       {/*  bg-[#2D274B] */}
       {/* <section
@@ -820,8 +825,8 @@ export default function LandingPageAlt() {
         aria-labelledby="sdil-courses"
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center"> */}
-          {/* Heading */}
-          {/* <motion.h2
+      {/* Heading */}
+      {/* <motion.h2
             id="sdil-courses"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -834,9 +839,8 @@ export default function LandingPageAlt() {
               Speak to the World with Confidence
             </span>
           </motion.h2> */}
-
-          {/* Subtitle */}
-          {/* <motion.p
+      {/* Subtitle */}
+      {/* <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -846,16 +850,14 @@ export default function LandingPageAlt() {
             Explore world languages guided by international certification standards.
             Learn from certified trainers across every level.
           </motion.p> */}
-
-          {/* Tag */}
-          {/* <div className="mt-6 flex justify-center">
+      {/* Tag */}
+      {/* <div className="mt-6 flex justify-center">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border text-xs md:text-sm font-medium text-[#4B437C] shadow-sm">
               🌍 Languages & Levels
             </div>
           </div> */}
-
-          {/* CATEGORY OPTIONS */}
-          {/* <div className="mt-8 md:mt-12 flex flex-wrap justify-center gap-2 md:gap-4">
+      {/* CATEGORY OPTIONS */}
+      {/* <div className="mt-8 md:mt-12 flex flex-wrap justify-center gap-2 md:gap-4">
             {[
               { key: "popular", label: "Popular" },
               { key: "asian", label: "Asian Languages" },
@@ -878,10 +880,9 @@ export default function LandingPageAlt() {
               </button>
             ))}
           </div> */}
-
-          {/* Responsive Grid with Flags */}
-          {/* LANGUAGE GRID (REPLACED CONTENT) */}
-          {/* <div className="mt-8 md:mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-6 justify-center">
+      {/* Responsive Grid with Flags */}
+      {/* LANGUAGE GRID (REPLACED CONTENT) */}
+      {/* <div className="mt-8 md:mt-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 md:gap-6 justify-center">
             {(activeCategory === "more"
               ? [
                 { lang: "Thai", code: "th" },
@@ -923,8 +924,8 @@ export default function LandingPageAlt() {
             ))}
           </div>
         </div> */}
-        {/* Modal for More Languages */}
-        {/* {showMoreLanguages && (
+      {/* Modal for More Languages */}
+      {/* {showMoreLanguages && (
           <div
             className="fixed inset-0 flex items-center justify-center bg-black/60 z-50 p-4"
             onClick={() => setShowMoreLanguages(false)}
@@ -939,26 +940,24 @@ export default function LandingPageAlt() {
           max-h-[85vh] overflow-y-auto
         "
             > */}
-              {/* Close Button */}
-              {/* <button
+      {/* Close Button */}
+      {/* <button
                 onClick={() => setShowMoreLanguages(false)}
                 className="absolute top-4 right-4 text-[#2D274B] hover:text-black text-xl md:text-2xl z-10"
               >
                 ✕
               </button> */}
-
-              {/* Title */}
-              {/* <h3 className="text-2xl md:text-3xl font-bold text-[#2D274B] mb-6 pr-8">
+      {/* Title */}
+      {/* <h3 className="text-2xl md:text-3xl font-bold text-[#2D274B] mb-6 pr-8">
                 Explore More Languages
               </h3> */}
-
-              {/* Languages Grid */}
-              {/* <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6 mt-6">
+      {/* Languages Grid */}
+      {/* <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6 mt-6">
                 {[
                   { name: "Thai", flag: "th" }, */}
-                  {/* { name: "Russian", flag: "ru" },
+      {/* { name: "Russian", flag: "ru" },
                   { name: "Mandarin", flag: "cn" }, */}
-                  {/* { name: "Italian", flag: "it" },
+      {/* { name: "Italian", flag: "it" },
                   { name: "Portuguese", flag: "pt" },
                   { name: "Korean", flag: "kr" },
                 ].map((lang, i) => (
@@ -991,13 +990,12 @@ export default function LandingPageAlt() {
           </div>
         )}
       </section> */}
-
       {/* Explore subjects section */}
       {/* bg-[#dc8d33] */}
       {/* <section className="relative py-12" aria-labelledby="sdil-subjects">
         <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center"> */}
-          {/* Heading */}
-          {/* <motion.h2
+      {/* Heading */}
+      {/* <motion.h2
             id="sdil-subjects"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1007,9 +1005,8 @@ export default function LandingPageAlt() {
           >
             Subjects You Can Explore
           </motion.h2> */}
-
-          {/* Subtitle */}
-          {/* <motion.p
+      {/* Subtitle */}
+      {/* <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -1019,9 +1016,8 @@ export default function LandingPageAlt() {
             Comprehensive courses across academic and <br /> professional
             subjects for holistic learning.
           </motion.p> */}
-
-          {/* Grid Subjects */}
-          {/* <motion.div
+      {/* Grid Subjects */}
+      {/* <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -1056,19 +1052,18 @@ export default function LandingPageAlt() {
                 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }} */}
-                {/* className="group relative h-56 rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-xl transition-all duration-300 cursor-pointer"
+      {/* className="group relative h-56 rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-xl transition-all duration-300 cursor-pointer"
                 style={{
                   backgroundImage: `url(${subject.img})`,
                   backgroundSize: "100% 100%", */}
-                  {/* backgroundPosition: "center",
+      {/* backgroundPosition: "center",
                 }}
                 onClick={() => handleSubjectClick(subject)}
               > */}
-                {/* Overlay */}
-                {/* <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-all duration-300"></div> */}
-
-                {/* Subject Name */}
-                {/* <div
+      {/* Overlay */}
+      {/* <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-all duration-300"></div> */}
+      {/* Subject Name */}
+      {/* <div
                   className={`absolute top-3 left-3 ${subject.isMore
                     ? "bg-[#5186cd] text-white"
                     : "bg-white/90 text-[#2D274B]"
@@ -1076,9 +1071,8 @@ export default function LandingPageAlt() {
                 >
                   {subject.name}
                 </div> */}
-
-                {/* More Overlay (Consistent with Hobbies) */}
-                {/* {subject.isMore && (
+      {/* More Overlay (Consistent with Hobbies) */}
+      {/* {subject.isMore && (
                   <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-xl bg-black/40 opacity-0 group-hover:opacity-100 transition">
                     Explore More →
                   </div>
@@ -1087,9 +1081,8 @@ export default function LandingPageAlt() {
             ))}
           </motion.div>
         </div> */}
-
-        {/* Modal for More Subjects */}
-        {/* {showMore && (
+      {/* Modal for More Subjects */}
+      {/* {showMore && (
           <div
             className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
             onClick={() => setShowMore(false)}
@@ -1137,13 +1130,12 @@ export default function LandingPageAlt() {
           </div>
         )}
       </section> */}
-
       {/* Explore Hobbies Section */}
       {/* bg-[#2D274B] */}
       {/* <section className="relative py-12 " aria-labelledby="sdil-hobbies">
         <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center"> */}
-          {/* Heading */}
-          {/* <motion.h2
+      {/* Heading */}
+      {/* <motion.h2
             id="sdil-hobbies"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -1153,9 +1145,8 @@ export default function LandingPageAlt() {
           >
             Beyond Academics, Your Passion Awaits
           </motion.h2> */}
-
-          {/* Subtitle */}
-          {/* <motion.p
+      {/* Subtitle */}
+      {/* <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -1165,9 +1156,8 @@ export default function LandingPageAlt() {
             Build creativity and skills with professional <br />
             Hobby / Passion trainers.
           </motion.p> */}
-
-          {/* Grid Hobbies */}
-          {/* <motion.div
+      {/* Grid Hobbies */}
+      {/* <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
@@ -1231,11 +1221,10 @@ export default function LandingPageAlt() {
                 }}
                 onClick={() => handleHobbyClick(hobby)}
               > */}
-                {/* Overlay */}
-                {/* <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-all duration-300"></div> */}
-
-                {/* Hobby Name */}
-                {/* <div
+      {/* Overlay */}
+      {/* <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-all duration-300"></div> */}
+      {/* Hobby Name */}
+      {/* <div
                   className={`absolute top-3 left-3 ${hobby.isMore
                     ? "bg-[#5186cd] text-white"
                     : "bg-white/90 text-[#2D274B]"
@@ -1243,9 +1232,8 @@ export default function LandingPageAlt() {
                 >
                   {hobby.name}
                 </div> */}
-
-                {/* More Overlay */}
-                {/* {hobby.isMore && (
+      {/* More Overlay */}
+      {/* {hobby.isMore && (
                   <div className="absolute inset-0 flex items-center justify-center text-white font-bold text-xl bg-black/40 opacity-0 group-hover:opacity-100 transition">
                     Explore More →
                   </div>
@@ -1254,9 +1242,8 @@ export default function LandingPageAlt() {
             ))}
           </motion.div>
         </div> */}
-
-        {/* Modal for More Hobbies */}
-        {/* {showMoreHobbies && (
+      {/* Modal for More Hobbies */}
+      {/* {showMoreHobbies && (
           <div
             className="fixed inset-0 flex items-center justify-center bg-black/50 z-50"
             onClick={() => setShowMoreHobbies(false)}
@@ -1270,21 +1257,19 @@ export default function LandingPageAlt() {
               "
               onClick={(e) => e.stopPropagation()}
             > */}
-              {/* Close Button */}
-              {/* <button
+      {/* Close Button */}
+      {/* <button
                 onClick={() => setShowMoreHobbies(false)}
                 className="absolute top-4 right-4 text-[#2D274B] hover:text-black text-2xl"
               >
                 ✕
               </button> */}
-
-              {/* Title */}
-              {/* <h3 className="text-3xl font-bold text-[#2D274B] mb-6">
+      {/* Title */}
+      {/* <h3 className="text-3xl font-bold text-[#2D274B] mb-6">
                 Explore More Hobbies
               </h3> */}
-
-              {/* Hobbies Grid */}
-              {/* <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+      {/* Hobbies Grid */}
+      {/* <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
                 {[
                   { name: "Yoga", icon: "🧘‍♀️" },
                   { name: "Swimming", icon: "🏊‍♂️" },
@@ -1332,93 +1317,87 @@ export default function LandingPageAlt() {
           </div>
         )}
       </section> */}
-
-      <section className="relative py-12 " aria-labelledby="sdil-languages">
-  <div className="max-w-6xl mx-auto px-6 lg:px-8 text-center">
-    
-    {/* Heading: Image ke text ke according update kiya gaya hai */}
-    <motion.h2
-      id="sdil-languages"
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7 }}
-      viewport={{ once: true }}
-      className="text-4xl md:text-5xl tracking-tight font-extrabold text-[#1a56ad]"
-    >
-      Learn Languages, Subjects, and Skills for Your Future
-    </motion.h2>
-
-    {/* Subtitle: Image ke chote text ke according */}
-    <motion.p
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: 0.2 }}
-      viewport={{ once: true }}
-      className="mt-5 text-lg text-slate-600 font-medium max-w-3xl mx-auto leading-relaxed"
-    >
-      Explore world languages and subjects guided by international certification standards. <br />
-      Learn from certified trainers across every level.
-    </motion.p>
-
-    {/* Grid: 6 items based on the image */}
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true }}
-      variants={{
-        hidden: { opacity: 0 },
-        visible: {
-          opacity: 1,
-          transition: { staggerChildren: 0.2, delayChildren: 0.2 },
-        },
-      }}
-      className="mt-16 grid gap-6 sm:grid-cols-2 md:grid-cols-3"
-    >
-      {[
-        { name: "SANSKRIT", img: sanskrit },
-        { name: "HINDI", img: hindi },
-        { name: "MARATHI", img: marathi },
-        { name: "BENGALI", img: bengali },
-        { name: "CHEMISTRY", img: chemistry },
-        { name: "ASTROLOGY", img: astrology },
-      ].map((item, idx) => (
-        <motion.div
-          key={idx}
-          variants={{
-            hidden: { opacity: 0, y: 30 },
-            visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-          }}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.98 }}
-          className="group relative h-64 rounded-xl overflow-hidden shadow-md border border-slate-200 cursor-pointer"
-          style={{
-            backgroundImage: `url(${item.img})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-          onClick={() => handleCommonClick(item.name)}
-        >
-          {/* Dark Overlay taaki text clear dikhe */}
-          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-all duration-300"></div>
-          <div
-            className="absolute top-4 left-4 bg-white/90 text-[#2D274B] px-4 py-1.5 rounded-md font-bold text-sm shadow-lg"
+      <section className="relative max-w-[1520px] mx-auto py-12 " aria-labelledby="sdil-languages">
+        <div className="mx-auto px-6 lg:px-8 text-center ">
+          {/* Heading: Image ke text ke according update kiya gaya hai */}
+          <motion.h2
+            id="sdil-languages"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+            viewport={{ once: true }}
+            className="text-4xl md:text-5xl tracking-tight font-extrabold text-[#1a56ad]"
           >
-            {item.name}
-          </div>
-        </motion.div>
-      ))}
-    </motion.div>
-  </div>
-</section>
+            Learn Languages, Subjects, and Skills for Your Future
+          </motion.h2>
 
+          {/* Subtitle: Image ke chote text ke according */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="mt-5 text-lg text-slate-600 font-medium max-w-3xl mx-auto leading-relaxed"
+          >
+            Explore world languages and subjects guided by international
+            certification standards. <br />
+            Learn from certified trainers across every level.
+          </motion.p>
+
+          {/* Grid: 6 items based on the image */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.2, delayChildren: 0.2 },
+              },
+            }}
+            className="mt-16 grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-6  "
+          >
+            {[
+              { name: "SANSKRIT", img: sanskrit },
+              { name: "HINDI", img: hindi },
+              { name: "MARATHI", img: marathi },
+              { name: "BENGALI", img: bengali },
+              { name: "CHEMISTRY", img: chemistry },
+              { name: "ASTROLOGY", img: astrology },
+            ].map((item, idx) => (
+              <motion.div
+                key={idx}
+                variants={{
+                  hidden: { opacity: 0, y: 30 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+                }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                className="group relative h-48 rounded-xl overflow-hidden shadow-md border border-slate-200 cursor-pointer"
+                style={{
+                  backgroundImage: `url(${item.img})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+                onClick={() => handleCommonClick(item.name)}
+              >
+                {/* Dark Overlay taaki text clear dikhe */}
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-all duration-300"></div>
+                <div className="absolute top-4 left-4 bg-white/90 text-[#2D274B] px-4 py-1.5 rounded-md font-bold text-sm shadow-lg">
+                  {item.name}
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
       {/* top trainer section */}
       <TopTrainers />
-
       {/* Why learners love us section */}
       {/* bg-[#2D274B] */}
       <section className="py-12 ">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
           {/* HEADING */}
           <div className="text-center">
             <h3 className="text-4xl lg:text-5xl font-extrabold text-[#1a56ad]">
@@ -1429,15 +1408,14 @@ export default function LandingPageAlt() {
             {/* bg-gradient-to-b from-[#294cae] to-[#1E3A8A] */}
             <div className="mt-6 inline-block  text-[#024aac] bg-white border-2 border-black/20 px-10 py-4 rounded-xl shadow-lg w-full">
               <p className="text-base lg:text-lg font-semibold">
-                Short lessons, lots of speaking time and tutors focused on practical
-                outcome. Learn phrases you’ll use the very next day.
+                Short lessons, lots of speaking time and tutors focused on
+                practical outcome. Learn phrases you’ll use the very next day.
               </p>
             </div>
           </div>
 
           {/* FEATURE CARDS */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-10">
-
             {features.map((f, idx) => (
               // bg-gradient-to-b from-[#294cae] to-[#1E3A8A] text-white
               <div
@@ -1447,29 +1425,24 @@ export default function LandingPageAlt() {
           p-8 shadow-xl hover:scale-[1.04] transition-transform duration-300"
               >
                 <div className="flex items-center gap-3">
-
-                
-                {/* ICON */}
-                <div className="w-12 h-12 flex items-center justify-center mb-3 bg-white/10 rounded-full backdrop-blur-sm">
-                  <f.icon
-                    className={`w-8 h-8 text-[#024aac] ${f.icon === Clock ? "stroke-[2.5]" : "fill-[#024aac] stroke-none"
+                  {/* ICON */}
+                  <div className="w-12 h-12 flex items-center justify-center mb-3 bg-white/10 rounded-full backdrop-blur-sm">
+                    <f.icon
+                      className={`w-8 h-8 text-[#024aac] ${
+                        f.icon === Clock
+                          ? "stroke-[2.5]"
+                          : "fill-[#024aac] stroke-none"
                       }`}
-                  />
+                    />
+                  </div>
+
+                  {/* TITLE */}
+                  <h4 className="text-xl font-bold mb-3">{f.title}</h4>
                 </div>
-
-                {/* TITLE */}
-                <h4 className="text-xl font-bold mb-3">
-                  {f.title}
-                </h4>
-</div>
                 {/* TEXT */}
-                <p className="text-lg opacity-90 leading-relaxed">
-                  {f.text}
-                </p>
-
+                <p className="text-lg opacity-90 leading-relaxed">{f.text}</p>
               </div>
             ))}
-
           </div>
 
           {/* BOTTOM BUTTON TAGS */}
@@ -1482,12 +1455,9 @@ export default function LandingPageAlt() {
             <div className="text-[#024aac] bg-white border-2 border-black/20 px-16 py-4 rounded-full text-lg font-semibold shadow-lg text-center hover:scale-105 transition">
               Excellent Material
             </div>
-
           </div>
-
         </div>
       </section>
-
       {/* Highlights Section */}
       <section
         className="relative py-12  text-white"
@@ -1573,9 +1543,7 @@ export default function LandingPageAlt() {
                   className="p-6 bg-white text-black rounded-2xl border-2 border-black/20 hover:border-[#024AAC]/50 transition"
                 >
                   <div className="text-5xl mb-3">{feature.icon}</div>
-                  <h4 className="text-lg font-semibold ">
-                    {feature.title}
-                  </h4>
+                  <h4 className="text-lg font-semibold ">{feature.title}</h4>
                   <p className="mt-2  text-sm leading-relaxed">
                     {feature.desc}
                   </p>
@@ -1597,9 +1565,8 @@ export default function LandingPageAlt() {
           </motion.p>
         </div>
       </section>
-
       {/* How it works section */}
-      <section className="py-10"aria-labelledby="how-it-works">
+      <section className="py-10" aria-labelledby="how-it-works">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-20">
             <h2
@@ -1623,9 +1590,7 @@ export default function LandingPageAlt() {
                 role="article"
               >
                 <div className="absolute -top-8 -left-8 w-20 h-20 rounded-full bg-[#A3B8E4] text-white text-2xl flex items-center justify-center font-bold shadow-[0_6px_16px_rgba(80,130,210,0.4)] tracking-[0.3em]">
-
-                {s.ind}
-
+                  {s.ind}
                 </div>
                 {/* <div className="absolute  w-28 h-28 -top-9 -left-9 ">
                   <div className=" w-28  h-28 rounded-full bg-[#5186cd] text-white text-4xl flex items-center justify-center font-bold   border-black border-2 ">
@@ -1636,11 +1601,11 @@ export default function LandingPageAlt() {
                   <s.icon className={`size-14 ${s.iconColor}`} aria-hidden />
                 </div>
                 <h3 className="font-semibold text-lg flex justify-center items-center text-center text-gray-900">
-                {/* <h3 className="font-semibold text-lg flex justify-center items-center text-center"> */}
+                  {/* <h3 className="font-semibold text-lg flex justify-center items-center text-center"> */}
                   {s.title}
                 </h3>
                 <p className="text-sm text-gray-800 mt-2 flex justify-center items-center text-center">
-                {/* <p className="text-sm text-[#4B437C] mt-2 flex justify-center items-center text-center"> */}
+                  {/* <p className="text-sm text-[#4B437C] mt-2 flex justify-center items-center text-center"> */}
                   {s.desc}
                 </p>
               </motion.div>
@@ -1648,34 +1613,33 @@ export default function LandingPageAlt() {
           </div>
         </div>
       </section>
-
       {/* Removed Reviews section */}
       {/* FAQ */}
       <section className="py-16" aria-labelledby="faq-heading">
         <div className="max-w-5xl mx-auto px-6 lg:px-8">
-
           <h3 id="faq-heading" className="text-4xl text-center font-extrabold">
             <span>Frequently Asked</span>
             <span className="text-[#1a56ad]"> Questions</span>
           </h3>
 
           <p className="mt-4 text-center text-gray-600">
-            Getting ready to apply? Check out the FAQ for answers to your questions.
+            Getting ready to apply? Check out the FAQ for answers to your
+            questions.
           </p>
 
           {/* Toggle Buttons */}
           <div className="flex justify-center mt-6">
             <div className="bg-gray-100 rounded-full p-1 flex gap-1">
-
               <button
                 onClick={() => {
                   setActiveFaq("learner");
                   setOpenFaq(null);
                 }}
-                className={`px-5 py-2 rounded-full text-sm font-semibold transition ${activeFaq === "learner"
-                  ? "bg-white shadow text-gray-900"
-                  : "text-gray-500"
-                  }`}
+                className={`px-5 py-2 rounded-full text-sm font-semibold transition ${
+                  activeFaq === "learner"
+                    ? "bg-white shadow text-gray-900"
+                    : "text-gray-500"
+                }`}
               >
                 Learner FAQs
               </button>
@@ -1685,14 +1649,14 @@ export default function LandingPageAlt() {
                   setActiveFaq("tutor");
                   setOpenFaq(null);
                 }}
-                className={`px-5 py-2 rounded-full text-sm font-semibold transition ${activeFaq === "tutor"
-                  ? "bg-white shadow text-gray-900"
-                  : "text-gray-500"
-                  }`}
+                className={`px-5 py-2 rounded-full text-sm font-semibold transition ${
+                  activeFaq === "tutor"
+                    ? "bg-white shadow text-gray-900"
+                    : "text-gray-500"
+                }`}
               >
                 Tutor FAQs
               </button>
-
             </div>
           </div>
 
@@ -1741,7 +1705,6 @@ export default function LandingPageAlt() {
           </div>
         </div>
       </section>
-
       {/* text-[#e0fa84] text-[#2D274B] */}
       {/* CTA  bg-gradient-to-r from-[#9787F3]/10 to-[#f97316]/8*/}
       {/* <section className="py-12 ">

@@ -7,7 +7,7 @@ import german from "../assets/German_Trainer.jpeg";
 import english from "../assets/English_Trainer.png";
 
 import TrainerBackCard, { Trainer } from "../components/TrainerBackCard";
-import { BookOpen, CheckCircle, Play, Star, Users } from "lucide-react";
+import { BookOpen, CheckCircle, Play, Star, User, Users } from "lucide-react";
 import axios from "axios";
 
 
@@ -264,20 +264,22 @@ export default function TopTrainers(): JSX.Element {
 
         {/* Bottom CTA Buttons */}
         <div className="flex justify-center gap-6 mt-14 w-full max-w-xl mx-auto">
+          
           <Link
-            to="/courses"
-            className="flex-1 flex items-center justify-center gap-2 h-[57px] bg-[#276dc9] text-white font-semibold rounded-xl shadow-md border border-white hover:bg-[#205eb0] transition text-lg"
-          >
-            <BookOpen className="w-5 h-5" />
-            Browse Courses
-          </Link>
-
+                    to="/become-trainer"
+                    className="
+                    flex-1 flex items-center justify-center gap-2 h-[57px] bg-[#276dc9] text-white font-semibold rounded-xl shadow-md border border-white hover:bg-[#205eb0] transition text-lg hover:scale-105"
+                  >
+                    <User className="w-5 h-5 " />Become a Trainer
+                  </Link>
+          
           {/* More Trainers */}
           <Link
             to="/main"
-            className="flex-1 flex items-center justify-center gap-2 px-0.5 h-14 bg-[#276dc9] text-white font-semibold rounded-xl shadow-md border-white border hover:bg-[#205eb0] transition text-lg"
+            className="
+            flex flex-1 gap-3 justify-center items-center  bg-white text-[#024AAC] font-bold rounded-2xl border-2 border-[#024AAC] shadow-md hover:bg-gray-50 hover:scale-105 transition-colors text-lg"
           >
-            <Users className="w-5 h-5" />
+            <Users className="w-5 h-5 fill-current stroke-0" />
             More Trainers
           </Link>
 

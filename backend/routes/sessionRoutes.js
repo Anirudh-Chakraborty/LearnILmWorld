@@ -300,25 +300,23 @@ router.post('/end-room/:id', authenticate, async (req, res) => {
 
     if (room_id) {
         try {
-        const hmsResponse = await apiService.post(`/active-rooms/${room_id}/end-room`, { reason: "Session ended by host", lock: true });
-        console.log(`[100ms] Room ${room_id} disabled successfully.`, {
-          statusCode: hmsResponse.status,
-        });
+        await apiService.post(`/active-rooms/${room_id}/end-room`, { reason: "Session ended by host", lock: true });
+        console.log(`[100ms] Active session for room ${room_id} ended.`);
       } catch (hmsError) {
-        console.error("[100ms] API Error disabling room:", hmsError.response?.data || hmsError.message);
-        
-        // 100ms throws 404 if the room is already empty/inactive. 
-        // We should ignore 404s and still close the DB session.
         if (hmsError.response && hmsError.response.status !== 404) {
-           return res.status(500).json({
-             success: false,
-             message: 'Failed to end room on 100ms. Please try again.',
-             error: hmsError.response?.data || hmsError.message
-           });
-        } else {
-           console.log("Room already inactive on 100ms. Proceeding to update DB.");
+           console.error("[100ms] Error ending active room:", hmsError.response?.data || hmsError.message);
         }
       }
+
+      // Permanently Disable Room 
+      try {
+        await apiService.post(`/rooms/${room_id}`, { enabled: false });
+        console.log(`[100ms] Room ${room_id} permanently disabled.`);
+      } catch (hmsError) {
+         console.error("[100ms] Error disabling room:", hmsError.response?.data || hmsError.message);
+         return res.status(500).json({ message: "Failed to disable room completely." });
+      }
+      
     }
 
     session.status = 'ended'

@@ -255,7 +255,7 @@ const TrainerProfile: React.FC = () => {
                 {activeTab !== 'profile' && (
                   <button
                     onClick={() => setActiveTab('profile')}
-                    className="mt-2 text-blue-200/80 hover:text-white transition text-sm underline"
+                    className="mt-2 text-white transition text-sm underline"
                   >
                     ← Back to Profile Information
                   </button>

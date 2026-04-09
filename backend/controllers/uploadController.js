@@ -9,6 +9,7 @@ const s3 = new S3Client({
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
   },
   requestChecksumCalculation: "WHEN_REQUIRED",
+  forcePathStyle: true,
 });
 
 export const getUploadUrl = async (req, res) => {
@@ -28,7 +29,7 @@ export const getUploadUrl = async (req, res) => {
     const command = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME,
       Key: key,
-      // ContentType: fileType,
+      ContentType: fileType,
     });
 
     const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 600 });

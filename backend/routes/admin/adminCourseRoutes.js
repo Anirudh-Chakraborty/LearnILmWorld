@@ -6,33 +6,20 @@ const router = express.Router();
 //CREATE course (Admin)
 router.post("/", async (req, res) => {
   try {
-    const { title, description, thumbnail, videoUrl, pdfUrl } = req.body;
+    const { title, description, thumbnail, pdfUrl } = req.body;
 
-
-
-    console.log("REQ.USER =", req.user);
-
-    if (!title || !thumbnail) {
+    if (!title || !thumbnail || !pdfUrl) {
       return res.status(400).json({
-        message: "Title and thumbnail are required",
-      });
-    }
-
-    // Optional: basic base64 sanity check
-    if (!thumbnail.startsWith("data:image")) {
-      return res.status(400).json({
-        message: "Thumbnail must be a base64 image",
+        message: "Title, thumbnail, and PDF are required",
       });
     }
 
     const course = new Course({
       title,
-      description,
-      thumbnail,        //for now base64 stored directly
-      videoUrl: videoUrl || "",
-      pdfUrl: pdfUrl || "",
+      description: Array.isArray(description) ? description : [],
+      thumbnail, 
+      pdfUrl,
     });
-
 
     const savedCourse = await course.save();
     res.status(201).json(savedCourse);
@@ -42,7 +29,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-//UPDATE course
+// UPDATE course
 router.put("/:id", async (req, res) => {
   try {
     const updated = await Course.findByIdAndUpdate(

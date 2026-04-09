@@ -6,10 +6,10 @@ import { FileText, ArrowLeft } from "lucide-react";
 const CoursePlayer = () => {
   const { id } = useParams();
   const [course, setCourse] = useState<any>(null);
+  const [openingPdf, setOpeningPdf] = useState(false);
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    // couse detail on the basis of id
     axios.get(`${API_BASE_URL}/api/courses/${id}`)
       .then(res => setCourse(res.data))
       .catch(err => console.error("Error fetching course:", err));
@@ -17,16 +17,21 @@ const CoursePlayer = () => {
 
   if (!course) return <div className="p-10 text-center">Loading Content...</div>;
 
-  const getYoutubeEmbed = (url) => {
-    if (!url) return null;
-    const videoId = url.split("v=")[1]?.split("&")[0];
-    return `https://www.youtube.com/embed/${videoId}`;
-  };
-
-
-  const openNotesInNewTab = () => {
-    if (course.pdfUrl) {
-      window.open(course.pdfUrl, "_blank");
+  const openNotesInNewTab = async () => {
+    if (!course.pdfUrl) return;
+    
+    try {
+      setOpeningPdf(true);
+      // Fetch signed URL from your R2 backend controller
+      const res = await axios.post(`${API_BASE_URL}/api/upload/get-download-url`, { 
+        fileKey: course.pdfUrl 
+      });
+      window.open(res.data.signedUrl, "_blank");
+    } catch (error) {
+      console.error("Failed to load PDF:", error);
+      alert("Could not open PDF at this time.");
+    } finally {
+      setOpeningPdf(false);
     }
   };
 
@@ -37,44 +42,35 @@ const CoursePlayer = () => {
           <ArrowLeft size={20} className="mr-2"/> Back to Courses
         </Link>
 
-        {/* --- MAIN VIEWER AREA --- */}
-        {course.videoUrl ? (
-          <div className="bg-black rounded-2xl overflow-hidden shadow-2xl aspect-video border border-gray-200">
-            <iframe 
-              className="w-full h-full"
-              src={getYoutubeEmbed(course.videoUrl)} 
-              title="Video Player"
-              allowFullScreen
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            ></iframe>
-          </div>
-        ) : (
-          <div className="h-64 bg-gray-200 rounded-2xl flex items-center justify-center text-gray-500">
-            No Video Available
-          </div>
-        )}
-
-        <div className="mt-8 flex flex-col md:flex-row justify-between items-start gap-4">
-          {/* Left side of the screen */}
+        {/* Top Header Section */}
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start gap-6">
           <div className="flex-1">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">{course.title}</h1>
-            <p className="text-gray-600 leading-relaxed text-base">
-              {course.description}
-            </p>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">{course.title}</h1>
+            
+            {/* Description rendered as list points */}
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Course Topics</h3>
+            <ul className="list-disc pl-5 space-y-2 text-gray-600 text-base leading-relaxed">
+              {course.description && course.description.length > 0 ? (
+                course.description.map((point: string, idx: number) => (
+                  <li key={idx}>{point}</li>
+                ))
+              ) : (
+                <li>No description provided.</li>
+              )}
+            </ul>
           </div>
 
-        {/* Right side of the screen */}
-        {course.pdfUrl && (
+          {/* PDF Button */}
+          {course.pdfUrl && (
             <button 
               onClick={openNotesInNewTab}
-              className="flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 active:translate-y-0 whitespace-nowrap"
+              disabled={openingPdf}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all whitespace-nowrap ${openingPdf ? 'bg-gray-400 cursor-not-allowed' : 'bg-pink-600 hover:bg-pink-700 hover:-translate-y-1 text-white'}`}
             >
               <FileText size={20} />
-              Open Notes PDF ↗
+              {openingPdf ? 'Loading...' : 'Open Notes PDF ↗'}
             </button>
           )}
-
         </div>
 
       </div>
