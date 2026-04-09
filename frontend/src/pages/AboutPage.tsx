@@ -72,7 +72,7 @@ export default function AboutPage() {
     {
       icon: Calendar,
       title: "Cancellation & Scheduling", 
-      text: "Learners can cancel or reschedule sessions from their dashboard as per the platform's cancellation policy. Late cancellations may not qualify for refund",
+      text: "Learners can cancel or reschedule sessions from their dashboard ass per the platform's cancellation policy. Late cancellations may not qualify for refund",
     },
     {
       icon: UserX,
@@ -82,7 +82,7 @@ export default function AboutPage() {
     {
       icon: XCircle,
       title: "Non- Refundable Cases",
-      text: "Refund is not applicable for completed sessions, partial attendance or misuse of the platform. Any suspicious activity may lead to account review.",
+      text: "Refund are not applicable for completed sessions, partial attendance or misuse of the platform. Any suspicious activity may lead to account review.",
     },
     {
       icon: LifeBuoy,

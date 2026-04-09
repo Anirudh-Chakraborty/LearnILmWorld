@@ -1503,7 +1503,7 @@ export default function LandingPageAlt() {
             viewport={{ once: true }}
             className="text-4xl md:text-5xl  text-[#1a56ad] font-extrabold text-center"
           >
-            Highlights of LearniLM 🌎 World
+            Highlights of LearniLM🌎World
           </motion.h2>
 
           {/* Subtitle */}
@@ -1593,7 +1593,7 @@ export default function LandingPageAlt() {
             className="mt-16 text-lg text-center text-[#2D274B] font-bold max-w-3xl mx-auto"
           >
             Personalized support and guidance ensure every learner’s success at{" "}
-            <br /> LearniLM 🌎 World.
+            <br /> LearniLM🌎World.
           </motion.p>
         </div>
       </section>

@@ -229,7 +229,7 @@ const Login: React.FC = () => {
 
             <Link
               to="/"
-              className="flex items-center gap-1 sm:gap-2 hover:text-[#1a56ad] transition"
+              className="flex items-center hover:text-[#1a56ad] transition"
             >
               <span>LearniLM</span>
 
@@ -237,9 +237,7 @@ const Login: React.FC = () => {
                 animate={{ rotate: 360 }}
                 transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
                 className="inline-block text-2xl sm:text-3xl md:text-4xl"
-              >
-                🌎
-              </motion.span>
+            >🌎</motion.span>
 
               <span>World</span>
             </Link>

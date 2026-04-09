@@ -77,7 +77,6 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/class-schedule', ClassScheduleRoutes);
 
-
 // Test route
 app.get('/api/test', (req, res) => {
   res.json({ message: 'Backend is running!' });
@@ -93,9 +92,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Something went wrong!' });
 });
 
-const PORT = process.env.PORT || 5001;
-const Mongo = process.env.MONGO_URI;
-
+const PORT = process.env.PORT || 5000;
+console.log(PORT)
 // Connect to MongoDB and start server
 mongoose.connect(Mongo)
   .then(() => {

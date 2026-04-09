@@ -343,7 +343,7 @@ const Register: React.FC = () => {
         >
 
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold drop-shadow-lg tracking-wide flex flex-wrap justify-center items-center gap-1 sm:gap-2 font-[Good Vibes]">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold drop-shadow-lg tracking-wide flex flex-wrap justify-center items-center gap-2 sm:gap-2 font-[Good Vibes]">
 
             {/* Join */}
             <span>Join</span>
@@ -351,7 +351,7 @@ const Register: React.FC = () => {
             {/* LearnILM World */}
             <Link
               to="/"
-              className={`flex items-center gap-1 sm:gap-2 ${formData.role === "student"
+              className={`flex items-center ${formData.role === "student"
                 ? "hover:text-blue-300"
                 : "hover:text-[#1a56ad]"
                 } transition`}

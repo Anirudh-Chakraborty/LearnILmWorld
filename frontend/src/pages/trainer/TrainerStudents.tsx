@@ -67,15 +67,16 @@ const TrainerStudents: React.FC = () => {
   if (loading) return <div className="p-10 text-center">Loading...</div>;
 
   return (
-    <div className="max-w-5xl mx-auto p-4">
+    <div className="max-w-5xl mx-auto p-4 sm:p-6">
       {/* TABS SECTION */}
-      <div className="flex flex-wrap items-center gap-2 mb-8">
+      <div className="flex flex-wrap gap-2 mb-6 sm:mb-8">
        
         {["all", "upcoming", "completed", "group", "private"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-5 py-2 rounded-xl text-sm border capitalize transition-all ${activeTab === tab ? "bg-[#1a56ad] text-white border-[#1a56ad]" : "bg-white text-gray-500 border-gray-200"}`}
+            className={`px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm border capitalize transition-all 
+            ${activeTab === tab ? "bg-[#1a56ad] text-white border-[#1a56ad]" : "bg-white text-gray-500 border-gray-200"}`}
           >
             {tab}
           </button>
@@ -93,23 +94,29 @@ const TrainerStudents: React.FC = () => {
           const displayTime = end ? `${start.format('hh:mm A')} - ${end.format('hh:mm A')}` : start.format('hh:mm A');
 
           return (
-            <div key={booking._id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex justify-between items-center">
+            <div key={booking._id} className="bg-white p-4 sm:p-5 rounded-2xl border border-gray-100 shadow-sm 
+          flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
               
               {/* LEFT CONTENT  */}
               <div className="flex flex-col gap-1.5">
                 {/* 1st Line: Name */}
-                <h3 className="text-lg font-bold text-gray-900">
-                  {booking.studentName || booking.student?.name || "Paridhi"}
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 break-words">
+                  {booking.studentName || booking.student?.name || "Anushree"}
                 </h3>
 
                 {/* Session Type */}
-                <div className="flex items-center gap-2 text-[#4c85d6] text-sm font-medium">
-                  {booking.bookingType?.toLowerCase().includes('group') ? <Users size={15} /> : <BookOpen size={15} />}
-                  <span className='text-gray-600'>{booking.bookingType || "Group"} Session</span>
+                <div className="flex items-center gap-2 text-[#4c85d6]  text-xs sm:text-sm font-medium">
+                  {booking.bookingType?.toLowerCase().includes('group') ? (
+                    <Users size={14} /> 
+                  ):( 
+                    <BookOpen size={14} />
+                    )}
+                  <span className='text-gray-600'>
+                    {booking.bookingType || "Group"} Session</span>
                 </div>
 
                 {/*Date & Time in one line */}
-                <div className="flex items-center gap-4 text-gray-500 text-sm mt-0.5">
+                <div className="flex flex-wrap items-center gap-3 text-gray-500 text-xs sm:text-sm mt-0.5">
                   <div className="flex items-center gap-1.5">
                     <Calendar size={14} className="text-[#4c85d6]" />
                     <span>{displayDate}</span>
@@ -122,14 +129,14 @@ const TrainerStudents: React.FC = () => {
               </div>
 
               {/* RIGHT: STATUS BADGE */}
-              <div className="flex-shrink-0">
+              <div className="flex justify-end sm:justify-center">
                 {isDone ? (
-                  <div className="flex items-center gap-1.5 text-[#4c85d6] font-semibold text-sm">
+                  <div className="flex items-center gap-1.5 text-[#4c85d6] font-semibold text-xs sm:text-sm">
                     <span>Completed</span>
                     <CheckCircle2 size={18} />
                   </div>
                 ) : (
-                  <span className="bg-[#1a56ad] text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm">
+                  <span className="bg-[#1a56ad] text-white px-3 sm:px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm">
                     Upcoming
                   </span>
                 )}
