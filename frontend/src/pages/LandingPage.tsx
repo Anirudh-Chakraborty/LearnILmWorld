@@ -1628,6 +1628,7 @@ export default function LandingPageAlt() {
       </div>
     </div>
   </div>
+  
       </section>
       {/* Removed Reviews section */}
       {/* FAQ */}
