@@ -14,6 +14,8 @@ const AdminTrainers: React.FC = () => {
         fetchTrainers()
     }, [])
 
+    
+
     const fetchTrainers = async () => {
         try {
             const token = localStorage.getItem('token')
