@@ -224,10 +224,16 @@ AI Chatbot (RAG-based / LLM-powered)
 Built with ❤️ by:
 
 Mudadla Yogitha
-
 Mohd Alfahad
-
 Preethi
+Kartik Saxena
+Anirudh Chakraborty
+Tapas Patra
+Anushree Bera
+Mayukh Banerjee
+Ravi Kumar
+
+
 
 📧 Contact
 
