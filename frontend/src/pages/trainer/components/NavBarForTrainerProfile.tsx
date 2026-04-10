@@ -14,9 +14,9 @@ const TrainerTabs = ({ activeTab, setActiveTab }: Props) => {
   ];
 
   return (
-    <div className="w-full flex justify-center mt-4 mb-6">
+    <div className="bg-white rounded-xl border p-1 shadow-sm">
       {/* Container */}
-      <div className="w-full max-w-5xl flex items-center justify-between bg-gray-200 p-1.5 rounded-full shadow-inner">
+      <div className="flex justify-center ">
         
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -24,12 +24,12 @@ const TrainerTabs = ({ activeTab, setActiveTab }: Props) => {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 text-center px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-all duration-200
+              onClick={() => setActiveTab(tab.id)} 
+              className={`flex-1 text-center px-3 py-1.5 text-sm font-medium rounded-full whitespace-nowrap transition-all duration-200
               ${
                 isActive
-                  ? "bg-white text-blue-600 shadow-md"
-                  : "text-gray-600 hover:bg-gray-300 hover:text-gray-900"
+                  ? "bg-blue-500 text-white shadow-sm"
+                  : "text-gray-500 hover:bg-gray-200 hover:text-gray-800"
               }
               active:scale-95`}
             >

@@ -1,20 +1,21 @@
-import { useState } from "react";
-import logo from '../assets/newlogo2.png';
-
+import { useState  } from "react";
+import logo from "../assets/newlogo.png";
+import NavbarSearch from "./NavbarSearch";
 import { Button, Nav, Offcanvas } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import CurrencySelector from "./CurrencySelector";
+// import CurrencySelector from "./CurrencySelector";
 
 type NavbarProps = {
   variant?: "default" | "main";
 };
 
-const Navbar = ({ variant = "default" }: NavbarProps) => {
+const Navbar = ({ variant = "default"  }: NavbarProps) => {
   const navigate = useNavigate();
   const { user, logout, loading } = useAuth();
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const location = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
 
   if (loading) return null;
 
@@ -28,8 +29,8 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
     ? user.role === "trainer"
       ? "/trainer"
       : user.role === "admin"
-      ? "/admin"
-      : "/student"
+        ? "/admin"
+        : "/student"
     : "/login";
 
   const handleScroll = (id: string) => {
@@ -40,13 +41,17 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
       }
     }
   };
+ const handleSearch =  () => {
+    if (searchQuery.trim()) {
+      navigate(`/main?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
-    <header className="sticky top-0 z-40">
-      <div className="flex w-full h-[75px] md:h-[85px] bg-[#203989] text-white">
-
+    <header className="sticky top-0 z-40 shadow-md">
+      <div className="flex w-full h-[75px] md:h-[85px] bg-[#eef5fd] text-[#02277a] items-center justify-between">
         {/* LEFT */}
-        <div className="w-fit flex items-center pl-1 md:pl-4 h-20">
+        <div className="w-fit  items-center pl-1 md:pl-4 h-20">
           <Link to="/" className="h-full flex items-center">
             <img
               src={logo}
@@ -55,102 +60,125 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
             />
           </Link>
         </div>
+        
+        {/*CENTER - SEARCH BAR*/}
+        <div className="hidden md:flex flex-1 items-center justify-center">
+          <div className="w-full max-w-xl px-4 ">
+            <NavbarSearch value={searchQuery} onChange={setSearchQuery} onSubmit={handleSearch} />
+          </div>
+        </div>
 
         {/* RIGHT */}
-        <div className="flex-1 flex items-center justify-end pr-4 md:pr-10">
-
+        <div className="flex items-center justify-end pr-4 md:pr-10">
           {/* DESKTOP NAV */}
           <nav className="hidden lg:flex items-center gap-8">
-
             {/* {variant === "main" && (
               <CurrencySelector variant="header" />
             )} */}
 
-            {!isLoggedIn || isAdmin  ? (
+            {!isLoggedIn || isAdmin ? (
               <>
                 <Link
-                    to="/about#about"
-                    onClick={() => handleScroll("about")}
-                    className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
-                    >
-                    About
+                  to="/about#about"
+                  onClick={() => handleScroll("about")}
+                  className="relative text-lg font-medium
+                   text-[#02277a] transition-all duration-300 
+                   no-underline hover:text-black 
+                   hover:-translate-y-1 after:content-[''] 
+                   after:absolute after:left-0
+                    after:bottom-[-4px] after:w-0 after:h-[2px]
+                     after:bg-[#02277a] after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  About
                 </Link>
                 <Link
-                    to="/careers"
-                    onClick={() => handleScroll("careers")}
-                    className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
-                    >
-                    Careers
+                  to="/careers"
+                  onClick={() => handleScroll("careers")}
+                  className="relative text-lg font-medium text-[#02277a] 
+                  transition-all duration-300 no-underline hover:text-black
+                   hover:-translate-y-1 after:content-[''] 
+                   after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px]
+                    after:bg-[#02277a] after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  Careers
                 </Link>
-                <Link to="/about#help"
-                    onClick={() => handleScroll("help")}
-                    className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
-                    >
-                    Help
+                <Link
+                  to="/about#help"
+                  onClick={() => handleScroll("help")}
+                  className="relative text-lg font-medium text-[#02277a] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-[#02277a] after:transition-all after:duration-300 hover:after:w-full"
+                >
+                  Help
                 </Link>
 
                 {isAdmin ? (
                   <button
-                  onClick={() => {
-                    logout();
-                    navigate("/login");
-                  }}
-                  className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
-                >
-                  Log Out
-                </button>
-                ) : (
-                <Link 
-                  to="/login"
-                  className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                    onClick={() => {
+                      logout();
+                      navigate("/login");
+                    }}
+                    className="relative text-lg font-medium text-[#02277a] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-[#02277a] after:transition-all after:duration-300 hover:after:w-full"
                   >
-                  Sign In
-                </Link>
+                    Log Out
+                  </button>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="relative text-lg font-medium text-[#02277a] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-[#02277a] after:transition-all after:duration-300 hover:after:w-full"
+                  >
+                    Sign In
+                  </Link>
                 )}
 
                 {isAdmin ? (
-                  <Link to={dashboardLink} 
-                  className="px-6 py-2 rounded-full bg-white text-[#024AAC] text-sm font-bold shadow hover:scale-105 transition"
+                  <Link
+                    to={dashboardLink}
+                    className="px-6 py-2 rounded-full bg-white text-[#02277a] text-sm font-bold shadow hover:scale-105 transition"
                   >
-                  Dashboard
-                </Link>
-                ): (
-                <Link
-                  to="/register"
-                  className="px-6 py-2 rounded-full bg-white text-[#024AAC] text-base font-bold shadow hover:scale-105 transition"
-                >
-                  Get Started
-                </Link>
+                    Dashboard
+                  </Link>
+                ) : (
+                  <Link
+                    to="/register"
+                    className="px-6 py-2 rounded-full bg-[#02277a] text-white text-base font-bold shadow hover:scale-105 transition"
+                  >
+                    Get Started
+                  </Link>
                 )}
               </>
             ) : (
               <>
-                {isTrainer ? (<Link to="/trainer/sessions"
-                  onClick={() => handleScroll("sessions")}
-                  className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                {isTrainer ? (
+                  <Link
+                    to="/trainer/sessions"
+                    onClick={() => handleScroll("sessions")}
+                    className="relative text-lg font-medium text-[#02277a] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
                   >
-                  My Sessions
-                </Link>
-                ) : (<Link to="/student/sessions"
-                  onClick={() => handleScroll("sessions")}
-                  className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                    My Sessions
+                  </Link>
+                ) : (
+                  <Link
+                    to="/student/sessions"
+                    onClick={() => handleScroll("sessions")}
+                    className="relative text-lg font-medium text-[#02277a] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-[#02277a] after:transition-all after:duration-300 hover:after:w-full"
                   >
-                  My Sessions
-                </Link>
+                    My Sessions
+                  </Link>
                 )}
 
                 {isTrainer ? (
-                  <Link to="/trainer/students"
+                  <Link
+                    to="/trainer/students"
                     onClick={() => handleScroll("students")}
-                    className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
-                    >
+                    className="relative text-lg font-medium text-[#02277a] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-[#02277a] after:transition-all after:duration-300 hover:after:w-full"
+                  >
                     My Students
                   </Link>
                 ) : (
-                  <Link to="/main" 
+                  <Link
+                    to="/main"
                     onClick={() => handleScroll("trainers")}
-                    className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
-                    >
+                    className="relative text-lg font-medium text-[#02277a] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-[#02277a] after:transition-all after:duration-300 hover:after:w-full"
+                  >
                     Find Trainers
                   </Link>
                 )}
@@ -160,14 +188,15 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
                     logout();
                     navigate("/login");
                   }}
-                  className="relative text-lg font-medium text-white transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                  className="relative text-lg font-medium text-[#02277a] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-[#02277a] after:transition-all after:duration-300 hover:after:w-full"
                 >
                   Log Out
                 </button>
 
-                <Link to={dashboardLink} 
-                  className="px-6 py-2 rounded-full bg-white text-[#024AAC] text-sm font-bold shadow hover:scale-105 transition"
-                  >
+                <Link
+                  to={dashboardLink}
+                  className="px-6 py-2 rounded-full bg-[#02277a] text-white text-sm font-bold shadow hover:scale-105 transition"
+                >
                   Dashboard
                 </Link>
               </>
@@ -205,29 +234,33 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
 
                   {!isLoggedIn || isAdmin ? (
                     <>
-                      <Nav.Link as={Link} to="/about#about"
-                      onClick={() => {
-                      handleScroll("about");
-                      setShowOffcanvas(false);
-                    }}
+                      <Nav.Link
+                        as={Link}
+                        to="/about#about"
+                        onClick={() => {
+                          handleScroll("about");
+                          setShowOffcanvas(false);
+                        }}
                       >
                         About
                       </Nav.Link>
-                      <Nav.Link as={Link} 
-                      to="/careers"
-                      onClick={() => {
-                      handleScroll("careers");
-                      setShowOffcanvas(false);
-                      }}
+                      <Nav.Link
+                        as={Link}
+                        to="/careers"
+                        onClick={() => {
+                          handleScroll("careers");
+                          setShowOffcanvas(false);
+                        }}
                       >
                         Careers
                       </Nav.Link>
-                      <Nav.Link as={Link} 
-                      to="/about#help"
-                      onClick={() => {
-                      handleScroll("help");
-                      setShowOffcanvas(false);
-                      }}
+                      <Nav.Link
+                        as={Link}
+                        to="/about#help"
+                        onClick={() => {
+                          handleScroll("help");
+                          setShowOffcanvas(false);
+                        }}
                       >
                         Help
                       </Nav.Link>
@@ -240,7 +273,7 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
                         <Link
                           to="/register"
                           onClick={() => setShowOffcanvas(false)}
-                          className="w-full mt-2 block text-center px-4 py-2 rounded-full bg-[#276dc9] text-white font-bold no-underline"
+                          className="w-full mt-2 block text-center px-4 py-2 rounded-full bg-[#02277a] text-white font-bold no-underline"
                         >
                           Get Started
                         </Link>
@@ -248,19 +281,20 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
 
                       {isAdmin ? (
                         <button
-                        onClick={() => {
-                          logout();
-                          navigate("/login");
-                          setShowOffcanvas(false);
-                        }}
-                        className="w-full mt-2 px-4 py-2 rounded-full bg-[#276dc9] text-white font-bold"
+                          onClick={() => {
+                            logout();
+                            navigate("/login");
+                            setShowOffcanvas(false);
+                          }}
+                          className="w-full mt-2 px-4 py-2 rounded-full bg-[#276dc9] text-white font-bold"
                         >
                           Log Out
                         </button>
                       ) : (
-                        <Nav.Link as={Link} 
-                        to="/login"
-                        onClick={() => setShowOffcanvas(false)}
+                        <Nav.Link
+                          as={Link}
+                          to="/login"
+                          onClick={() => setShowOffcanvas(false)}
                         >
                           Sign In
                         </Nav.Link>
@@ -269,45 +303,48 @@ const Navbar = ({ variant = "default" }: NavbarProps) => {
                   ) : (
                     <>
                       {isTrainer ? (
-                        <Nav.Link as={Link} 
+                        <Nav.Link
+                          as={Link}
                           to="/trainer/sessions"
                           onClick={() => {
-                          handleScroll("sessions");
-                          setShowOffcanvas(false);
-                        }}
-                        >
-                        My Sessions
-                      </Nav.Link>
-                      ) : (
-                        <Nav.Link as={Link} 
-                          to="/student/sessions"
-                          onClick={() => {
-                          handleScroll("sessions");
-                          setShowOffcanvas(false);
-                        }}
+                            handleScroll("sessions");
+                            setShowOffcanvas(false);
+                          }}
                         >
                           My Sessions
-                      </Nav.Link>
+                        </Nav.Link>
+                      ) : (
+                        <Nav.Link
+                          as={Link}
+                          to="/student/sessions"
+                          onClick={() => {
+                            handleScroll("sessions");
+                            setShowOffcanvas(false);
+                          }}
+                        >
+                          My Sessions
+                        </Nav.Link>
                       )}
-                      
 
                       {isTrainer ? (
-                        <Nav.Link as={Link} 
-                        to="/trainer/students"
-                        onClick={() => {
-                          handleScroll("students");
-                          setShowOffcanvas(false);
-                        }}
+                        <Nav.Link
+                          as={Link}
+                          to="/trainer/students"
+                          onClick={() => {
+                            handleScroll("students");
+                            setShowOffcanvas(false);
+                          }}
                         >
                           My Students
                         </Nav.Link>
                       ) : (
-                        <Nav.Link as={Link} 
-                        to="/main"
-                        onClick={() => {
-                          handleScroll("trainers");
-                          setShowOffcanvas(false);
-                        }}
+                        <Nav.Link
+                          as={Link}
+                          to="/main"
+                          onClick={() => {
+                            handleScroll("trainers");
+                            setShowOffcanvas(false);
+                          }}
                         >
                           Find Trainers
                         </Nav.Link>

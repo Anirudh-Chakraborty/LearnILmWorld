@@ -45,6 +45,11 @@ const TrainersGrid: React.FC<Props> = ({ searchTerm, filters, learningType, setN
 
     const buildQueryParams = useCallback(() => {
         const params: any = { page, limit: 6 }
+
+        if(searchTerm?.trim()) {
+            params.search = searchTerm;
+            return params;
+        }
         if (filters.language?.trim()) params.language = filters.language
         if (filters.specialization?.trim()) params.specialization = filters.specialization
         if (filters.hobby?.trim()) params.specialization = filters.hobby
@@ -83,6 +88,7 @@ const TrainersGrid: React.FC<Props> = ({ searchTerm, filters, learningType, setN
                     return uniqueNationalities
                 })
 
+                if (!searchTerm?.trim()) {
                 if (learningType === 'subject') {
                     verified = verified.filter((t: any) =>
                         Array.isArray(t.profile?.specializations) && t.profile.specializations.length > 0
@@ -107,6 +113,7 @@ const TrainersGrid: React.FC<Props> = ({ searchTerm, filters, learningType, setN
                 if (filters.nationality?.trim()) {
                     verified = verified.filter((t: any) => t.profile?.nationalityCode === filters.nationality)
                 }
+            }
 
                 const countsRes = await axios.get(`${API_BASE_URL}/api/reviews/counts`)
                 const counts = countsRes.data || {}
