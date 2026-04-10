@@ -369,7 +369,7 @@ const Login: React.FC = () => {
           </form>
 
           <div className="mt-6 flex flex-col items-center">
-            <div className="w-full border-t border-gray-300 my-4 position-relative">
+            <div className="w-full  my-4 position-relative">
               <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2  px-2 text-gray-500 text-sm">
                 Or continue with
               </span>

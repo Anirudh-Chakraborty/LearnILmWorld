@@ -88,8 +88,8 @@
        icon: <Award className="w-6 h-6 text-[#276dc9]" />
      },
      {
-       title: "Lifetime Access",
-       desc: "Learn at your own pace with unlimited access to all materials.",
+       title: "One Year Access",
+       desc: "Learn at your own pace with unlimited access to all materials for one year.",
        icon: <Clock className="w-6 h-6 text-[#276dc9]" />
      },
    ];
@@ -100,8 +100,8 @@
      { q: "Who are these courses designed for?", a: "These courses are designed for professionals at all levels who want to learn different languages." },
      { q: "Is this about manipulating people?", a: "Absolutely not. We focus on ethical influence, emotional intelligence, and constructive communication." },
      { q: "How long do I have access to the courses?", a: "You get the course for the limited time period." },
-     { q: "Do you offer refunds?", a: "Yes, we offer a 30-day money-back guarantee if you are not satisfied." },
-     { q: "Can I get a certificate upon completion?", a: "Yes, all our courses come with a verifiable certificate of completion." },
+     { q: "Do you offer refunds?", a: "No, we don't provide refunds already marked in cancellation policy." },
+     { q: "Will I get a certificate upon completion?", a: "Yes, all our courses come with a verifiable certificate of completion." },
      { q: "Are the courses available in multiple languages?", a: "Yes, the courses are available in multiple languages." },
    ];
 
@@ -141,6 +141,10 @@
        }
      }
    };
+
+   const scrollToCourse = () => {
+  document.getElementById("course1")?.scrollIntoView({ behavior: "smooth" });
+};
 
    return (
      <div className="min-h-screen ">
@@ -188,7 +192,7 @@
        </div> */}
 
       {/* --- COURSES GRID SECTION --- */}
-       <div className="max-w-7xl mx-auto px-6 py-12">
+       <div id='course1' className="max-w-7xl mx-auto px-6 py-12">
          <motion.div
            initial="hidden"
            whileInView="visible"
@@ -367,17 +371,17 @@
              <h2 className="text-2xl md:text-4xl  font-bold mb-6 text-white leading-tight">Ready to Transform Your Career?</h2>
              <p className="text-gray-300 text-base mb-10 max-w-2xl mx-auto">Join thousands of professionals who have mastered the art of ethical office politics. Start your journey to career success today.</p>
              <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
-               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-4 py-4  text-[#276dc9] bg-white rounded-lg font-bold  transition flex items-center justify-center shadow-lg">
-                 Get Started Now <span className="ml-2">→</span>
+               <motion.button onClick={scrollToCourse}  whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-4 py-4  text-[#276dc9] bg-white rounded-lg font-bold  transition flex items-center justify-center shadow-lg">
+                 Start Learning <span className="ml-2">→</span>
                </motion.button>
-               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-4 py-4 bg-transparent border border-gray-600 text-white rounded-lg font-bold hover:bg-gray-800 transition shadow-lg">
+               {/* <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-4 py-4 bg-transparent border border-gray-600 text-white rounded-lg font-bold hover:bg-gray-800 transition shadow-lg">
                  View All Courses
-               </motion.button>
+               </motion.button> */}
              </div>
              <div className="w-full h-px bg-gray-800 mb-8 max-w-3xl mx-auto"></div>
              <div className="flex flex-col md:flex-row justify-center gap-y-4 gap-x-8 text-sm text-gray-300">
-               <span className="flex items-center justify-center gap-2"><span className="text-white">✓</span> 30-Day Money-Back Guarantee</span>
-               <span className="flex items-center justify-center gap-2"><span className="text-white">✓</span> Lifetime Access</span>
+               {/* <span className="flex items-center justify-center gap-2"><span className="text-white">✓</span> 30-Day Money-Back Guarantee</span> */}
+               <span className="flex items-center justify-center gap-2"><span className="text-white">✓</span> One Year Access</span>
                <span className="flex items-center justify-center gap-2"><span className="text-white">✓</span> Certificate Included</span>
              </div>
            </div>

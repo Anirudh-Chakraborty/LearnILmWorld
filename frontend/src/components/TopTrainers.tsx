@@ -58,7 +58,7 @@ const top = [
         name: "Poulami Paul",
         role: "trainer",
         profile: {
-          imageUrl: 'trainers/profiles/1774335181113-WhatsApp Image 2026-03-24 at 12.13.58 (1).jpeg',
+          imageUrl: 'trainers/profiles/1775795077182-1000145071.jpg',
           languages: ["Hindi"],
           subjects: [],
           hobbies: [],
@@ -75,7 +75,7 @@ const top = [
         name: "Shabana Saheed",
         role: "trainer",
         profile: {
-          imageUrl: "trainers/profiles/1775145254193-my pic.jpeg",
+          imageUrl: "trainers/profiles/1775737097395-WhatsApp Image 2026-04-09 at 5.44.48 PM.jpeg",
           subjects: [],
           languages: ["Hindi"],
           hobbies: [],
@@ -176,7 +176,7 @@ export default function TopTrainers(): JSX.Element {
               <div
                 key={id ?? idx}
                 onClick={() => setActiveTrainer(trainer)}
-                className="flex flex-col h-[600px]  border-blue-100 border-2 rounded-[2rem] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-lg transition-all"
+                className="flex flex-col h-[530px]  border-blue-100 border-2 rounded-[2rem] p-4 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-lg transition-all"
               >
                 <div className="relative w-full h-[200px] rounded-2xl overflow-hidden mb-4 shrink-0 bg-gray-50">
                   <div className="absolute top-0 right-0 z-10">
@@ -200,9 +200,9 @@ export default function TopTrainers(): JSX.Element {
                 </div>
 
                 {/* about */}
-                <p className="text-[13px] text-gray-700 leading-relaxed overflow-y-auto no-scrollbar flex-1 ">
+                {/* <p className="text-[10px] mt-2  text-gray-700 leading-relaxed overflow-y-auto no-scrollbar flex-1 ">
                   {trainer.profile?.about}
-                </p>
+                </p> */}
 
                 {/* Ratings & Experience */}
                 <div className="flex items-center gap-3 mb-4 mt-4 shrink-0 text-[13px]">
@@ -220,12 +220,12 @@ export default function TopTrainers(): JSX.Element {
                   {/* Expertise */}
                   {trainer.profile?.languages && trainer.profile.languages.length > 0 && (
                     <div className="mb-2.5">
-                      <p className="text-[12px] text-gray-500 mb-1.5">Expertise</p>
+                      <p className="text-[15px] text-gray-500 mb-1.5">Expertise</p>
                       <div className="flex flex-wrap gap-2">
                         {trainer.profile.languages.slice(0, 2).map((lang, i) => (
                           <span
                             key={i}
-                            className="bg-purple-50/50 border border-purple-100 text-[#7186ce] text-[12px] px-3 py-1 rounded-lg"
+                            className="bg-purple-50/50 border border-purple-100 text-[#7186ce] text-[14px] px-3 py-1 rounded-lg"
                           >
                             {lang}
                           </span>

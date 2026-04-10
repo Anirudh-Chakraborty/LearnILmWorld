@@ -61,6 +61,8 @@ import phy from "../assets/Physics_new.jpeg";
 import chem from "../assets/Chemistry_new.jpeg";
 import bio from "../assets/Biology_new.jpeg";
 import cs from "../assets/ComputerScience_new.png";
+import razorpay from "../assets/razorpay.png";
+import Hundredms from "../assets/100ms.jpeg";
 import Footer from "../components/Footer";
 import TopTrainers from "../components/TopTrainers";
 // import { LanguageCard } from '../components/LanguageCard'
@@ -804,7 +806,7 @@ export default function LandingPageAlt() {
               <div className="flex flex-col">
                 <p className="font-bold text-2xl text-[#2D274B]">Flexible</p>
                 <p className="text-base text-gray-500 ">
-                  Weekday / weekend batches
+                  Learn Anytime
                 </p>
               </div>
             </div>
@@ -1610,8 +1612,22 @@ export default function LandingPageAlt() {
                 </p>
               </motion.div>
             ))}
+
           </div>
+            <div className="mt-10 border-t border-gray-100 pt-12">
+      <p className="text-center text-sm font-semibold text-gray-400 uppercase tracking-widest mb-8">
+        Secured by & Powered by
+      </p>
+      <div className="flex flex-wrap items-center justify-center gap-12 md:gap-24 ">
+        <div className="w-40 md:w-48 ">
+          <img src={razorpay} alt="Razorpay" className="w-full h-auto object-contain" />
         </div>
+        <div className="w-40 md:w-48 ">
+          <img src={Hundredms} alt="100ms" className="w-full h-auto object-contain" />
+        </div>
+      </div>
+    </div>
+  </div>
       </section>
       {/* Removed Reviews section */}
       {/* FAQ */}

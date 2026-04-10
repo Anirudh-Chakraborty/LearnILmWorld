@@ -72,7 +72,7 @@ export default function AboutPage() {
     {
       icon: Calendar,
       title: "Cancellation & Scheduling", 
-      text: "Learners can cancel or reschedule sessions from their dashboard ass per the platform's cancellation policy. Late cancellations may not qualify for refund",
+      text: "Once booked no cancellation and no rescheduling.",
     },
     {
       icon: UserX,
