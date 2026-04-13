@@ -151,7 +151,7 @@ const Navbar = ({ variant = "default"  }: NavbarProps) => {
                   <Link
                     to="/trainer/sessions"
                     onClick={() => handleScroll("sessions")}
-                    className="relative text-lg font-medium text-[#02277a] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 hover:after:w-full"
+                    className="relative text-lg font-medium text-[#02277a] transition-all duration-300 no-underline hover:text-black hover:-translate-y-1 after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-[#02277a] after:transition-all after:duration-300 hover:after:w-full"
                   >
                     My Sessions
                   </Link>

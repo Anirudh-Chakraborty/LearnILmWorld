@@ -42,7 +42,7 @@ function App() {
           <CurrencyProvider>
             <Router>
 
-              <Chatbot />
+              {/* <Chatbot /> */}
 
               <ScrollRestoration />
               <ScrollToTop />

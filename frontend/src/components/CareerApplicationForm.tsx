@@ -90,8 +90,8 @@ export default function CareerApplicationForm({ onClose }: Props) {
             ×
         </button>
 
-        <h2 className="text-[1.35rem] font-bold text-white mb-8 text-center flex items-center justify-center gap-2">
-            Apply to Join LearniLM <span className="text-xl">🌍</span> World
+        <h2 className="text-[1.35rem] font-bold text-white mb-8 text-center flex items-center justify-center">
+            Apply to Join LearniLM<span className="text-xl">🌍</span> World
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">

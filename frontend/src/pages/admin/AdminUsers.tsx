@@ -40,6 +40,7 @@ interface UserProfile {
 	location?: string
 	emailVerification?: EmailVerification
 	resume?: string
+	availability?: any[];
 	privateSessionRate?: PrivateSessionRates;
 	groupSessionRate?: GroupSessionRates;
 }
@@ -74,6 +75,15 @@ const AdminUsers: React.FC = () => {
 			emailVerification: {
 				isVerified: false,
 			},
+			availability: [
+            { day: "monday", startTime: "10:00", endTime: "11:00", available: true },
+            { day: "tuesday", startTime: "10:00", endTime: "10:30", available: true },
+           { day: "wednesday", startTime: "11:00", endTime: "11:30", available: true },
+          { day: "thursday", startTime: "10:00", endTime: "11:00", available: true },
+          { day: "friday", startTime: "10:00", endTime: "10:30", available: true },
+         { day: "saturday", startTime: null, endTime: null, available: false },
+         { day: "sunday", startTime: null, endTime: null, available: false },
+         ],
 			resume: "",
 			privateSessionRate: { 30: 25, 60: 45, 90: 65 },
 			groupSessionRate: {  90: 25 }
@@ -207,7 +217,17 @@ const AdminUsers: React.FC = () => {
 			}
 		}));
 	};
-
+    const updateAvailability = (index: number, subfield: string, value: any) => {
+        setFormData((prev) => {
+            const arr = [...(prev.profile.availability || [])];
+            arr[index] = { ...arr[index], [subfield]: value };
+            if (subfield === "available" && !value) {
+                arr[index].startTime = null;
+                arr[index].endTime = null;
+            }
+            return { ...prev, profile: { ...prev.profile, availability: arr } };
+        });
+    };
 	// text fields change
 	const handleCertFieldChange = (index: number, field: keyof Certification, value: string) => {
 		setFormData(prev => {
@@ -779,7 +799,39 @@ const AdminUsers: React.FC = () => {
 								</button>
 							</div>
 						</>
-					)}
+					)} 
+
+					{/* availability */}
+                   {formData.role === 'trainer' && (
+                        <div className="col-span-1 md:col-span-4 mt-4 border-t pt-4">
+                        <h4 className="font-semibold mb-3">Weekly Availability</h4>
+                        <div className="space-y-2">
+                          {(formData.profile.availability || []).map((av, idx) => (
+                        <div key={av.day} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
+                         <div className="flex items-center gap-4">
+                         <span className="w-20 font-medium capitalize">{av.day}</span>
+                        <input 
+                            type="checkbox" 
+                            checked={!!av.available} 
+                            onChange={(e) => updateAvailability(idx, "available", e.target.checked)}
+                            className="w-4 h-4"
+                        />
+                        <span className={av.available ? "text-blue-600" : "text-gray-400"}>
+                            {av.available ? "Available" : "Not Available"}
+                        </span>
+                    </div>
+                    {av.available && (
+                        <div className="flex gap-2 items-center">
+                            <input type="time" value={av.startTime || ""} onChange={(e) => updateAvailability(idx, "startTime", e.target.value)} className="border p-1 rounded" />
+                            <span>-</span>
+                            <input type="time" value={av.endTime || ""} onChange={(e) => updateAvailability(idx, "endTime", e.target.value)} className="border p-1 rounded" />
+                        </div>
+                        )}
+                     </div>
+            ))}
+        </div>
+    </div>
+)}
 
 					<button type="submit" className="col-span-1 md:col-span-1 bg-[#0ea5a3] text-white p-3 rounded-md hover:shadow-lg transition">
 						{editingUserId ? 'Update User' : 'Create User'}

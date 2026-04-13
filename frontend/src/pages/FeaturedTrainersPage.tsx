@@ -9,35 +9,36 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const topTrainers = [
   {
-    _id: "68ef33d0cad95b62472f382a",
-    name: "Shannet",
-    role: "trainer",
-    profile: {
-      imageUrl: "trainers/profiles/1771824341270-pasted-image-1771824341267.jpg",
-      languages: ["Spanish"],
-      subjects: [],
-      hobbies: [],
-      experience: 14,
-      education: "Master's in Human and Social Sciences",
-      about: "Shanat Andrea Oliveros Avendaño is a language specialist with over 14 years of teaching experience and one year of professional translation, proficient in English, French, and Spanish, with a teaching approach based on international curricula."
-    },
-    pickRole: "language",
-  },
-  {
-    _id: "691c5f3ca0cce9bf08c670da",
-    name: "Sinqobile Mazibuko",
-    role: "trainer",
-    profile: {
-      imageUrl: "trainers/profiles/1771824457678-pasted-image-1771824457675.jpg",
-      languages: ["English"],
-      subjects: [],
-      hobbies: [],
-      experience: 5,
-      education: "Certified Online English Trainer",
-      about: "Sinqobile Mazibuko is a dedicated and certified Online Teacher with five years of experience, specializing in English, IsiZulu, Mathematics, Science, and Technology, who is familiar with the Caps and IEB curriculum."
-    },
-    pickRole: "language",
-  },
+    _id: "69ca438681483defd20dcc68",
+        name: "Srikrishna Baitmangalkar",
+        role: "trainer",
+        profile: {
+          imageUrl: "trainers/profiles/1774877961235-my photo 2.jpeg",
+          languages: ["Sanskrit"],
+          subjects: [],
+          hobbies: [],
+          experience: 20,
+          education: "M.A IN SANSKRIT",
+          about: "Committed to integrating  Sanskrit into creative extra-curricular activities that spark curiosity and love for learning.- Passionate about helping young learners build language confidence while preserving and promoting Indian cultural heritage."
+        },
+        pickRole: "language",
+      },
+
+      {
+        _id: "69c78acc38a980c2c07de752",
+        name: "Antara Sarkar",
+        role: "trainer",
+        profile: {
+          imageUrl: "trainers/profiles/1775029070247-Antara_Sarkar.jpg",
+          languages: ["Bengali"],
+          subjects: [],
+          hobbies: [],
+          experience: 5,
+          education: "MA,B.ED",
+          about: "I am an educator ,hailed from West Bengal. I have done my degrees from Visva-Bharati University by the great Nobel laureate Rabindranath Tagore. Teaching is for me like shaping minds for the better purpose."
+        },
+        pickRole: "language",
+      },
   {
     _id: "69b7c806c409f3b76c0db217",
     name: "Kartik",
@@ -212,7 +213,7 @@ const FeaturedSection = () => {
                       <img
                         src={displayImage}
                         alt={trainer.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 object-top"
                       />
                     ) : (
                       <User className="w-16 h-16 text-gray-300" />

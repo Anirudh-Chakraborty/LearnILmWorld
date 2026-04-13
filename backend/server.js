@@ -16,6 +16,7 @@ import uploadRoutes from './routes/uploadRoutes.js';
 import dotenv from 'dotenv';
 import ClassScheduleRoutes from './routes/classScheduleRoutes.js';
 import { clear } from 'google-auth-library/build/src/auth/envDetect.js';
+import { clear } from 'google-auth-library/build/src/auth/envDetect.js';
 
 dotenv.config();
 
@@ -76,7 +77,6 @@ app.use('/api/careers', careerRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/class-schedule', ClassScheduleRoutes);
-
 
 // Test route
 app.get('/api/test', (req, res) => {
